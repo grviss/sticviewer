@@ -4,12 +4,20 @@ import sys
 import numpy as np
 
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, qApp,
 QVBoxLayout)
 import pyqtgraph as pg
 
 import sparsetools as sp
+
+def mplcm_to_pglut(cm_name):
+    cmap = cm.get_cmap(cm_name)
+    cmap._init()
+    lut = (cmap._lut * 255).view(np.ndarray)
+    return lut
+
 
 class Window(QMainWindow):
     def __init__(self):
@@ -55,6 +63,14 @@ class Window(QMainWindow):
         self.img10 = pg.ImageItem()
         self.img11 = pg.ImageItem()
         self.img12 = pg.ImageItem()
+
+        # Set cmaps
+        self.img00.setLookupTable(mplcm_to_pglut('gist_heat'))
+        self.img01.setLookupTable(mplcm_to_pglut('bwr'))
+        self.img02.setLookupTable(mplcm_to_pglut('gist_gray'))
+        self.img10.setLookupTable(mplcm_to_pglut('RdGy_r'))
+        self.img11.setLookupTable(mplcm_to_pglut('Oranges'))
+        self.img12.setLookupTable(mplcm_to_pglut('Greens'))
 
         # Add panels to GUI
         self.panel00.addItem(self.img00)
