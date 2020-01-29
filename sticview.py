@@ -91,6 +91,8 @@ class Window(QMainWindow):
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
 
+        self.setlimits()
+
     def drawModel(self):
         self.img00.setImage(self.m.temp[0,:,:,self.itau])
         self.img01.setImage(self.m.vlos[0,:,:,self.itau])
@@ -102,6 +104,20 @@ class Window(QMainWindow):
     def linkviews(self, anchorview, view):
         view.setXLink(anchorview)
         view.setYLink(anchorview)
+
+    def setlimits(self):
+        self.panel00.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+                maxXRange=self.nx, maxYRange=self.ny)
+        self.panel01.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+                maxXRange=self.nx, maxYRange=self.ny)
+        self.panel02.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+                maxXRange=self.nx, maxYRange=self.ny)
+        self.panel10.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+                maxXRange=self.nx, maxYRange=self.ny)
+        self.panel11.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+                maxXRange=self.nx, maxYRange=self.ny)
+        self.panel12.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+                maxXRange=self.nx, maxYRange=self.ny)
 
 
 if __name__ == '__main__':
