@@ -155,14 +155,18 @@ class Window(QMainWindow):
                 maxYRange=self.ny)
 
     def getFileName(self, typedict=None):
+        inam = 'getFileName'
         filename, _ = QFileDialog.getOpenFileName(self, 
             "Please select the input {0} file".format(typedict['name']), os.getcwd(), 
             "STiC {0} file ({1})".format(typedict['fullname'],
                 typedict['filter']))
         if filename:
+            print("{0}: opening {1} file {2}".format(inam, typedict['fullname'],
+                filename))
             return filename
         else:
-            print("getFileName [error]: {0} file required to launch STiCViewer".format(typedict['fullname']))
+            print("{0} [error]: {1} file required to launch " \
+                    "STiCViewer".format(inam, typedict['fullname']))
             sys.exit()
 
 if __name__ == '__main__':
