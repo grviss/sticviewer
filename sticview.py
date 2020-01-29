@@ -64,6 +64,13 @@ class Window(QMainWindow):
         self.panel11.addItem(self.img11)
         self.panel12.addItem(self.img12)
 
+        # Link panel views
+        self.linkviews(self.panel00, self.panel01)
+        self.linkviews(self.panel00, self.panel02)
+        self.linkviews(self.panel00, self.panel10)
+        self.linkviews(self.panel00, self.panel11)
+        self.linkviews(self.panel00, self.panel12)
+
         # ----- initialise menubar ----
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
@@ -91,6 +98,10 @@ class Window(QMainWindow):
         self.img10.setImage(self.m.Bln[0,:,:,self.itau])
         self.img11.setImage(self.m.Bho[0,:,:,self.itau])
         self.img12.setImage(self.m.azi[0,:,:,self.itau])
+
+    def linkviews(self, anchorview, view):
+        view.setXLink(anchorview)
+        view.setYLink(anchorview)
 
 
 if __name__ == '__main__':
