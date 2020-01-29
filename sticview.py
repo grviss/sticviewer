@@ -7,10 +7,13 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, qApp,
-QVBoxLayout)
+QVBoxLayout, QFileDialog)
+from PyQt5 import QtCore
 import pyqtgraph as pg
 
 import sparsetools as sp
+
+from ipdb import set_trace as stop
 
 def mplcm_to_pglut(cm_name):
     cmap = cm.get_cmap(cm_name)
@@ -25,8 +28,15 @@ class Window(QMainWindow):
 
         pg.setConfigOptions(imageAxisOrder='row-major')
 
-        # ---- process input ----
-        self.mfile = sys.argv[1]
+        # ---- get input ----
+        self.filetypes = {\
+             'atm': {'name': 'atmosout', 'fullname': 'atmosphere model',
+             'filter': 'atmosout*.nc'},
+             'syn': {'name': 'synthetic', 'fullname': 'synthetic profile',
+             'filter': 'synthetic*.nc'},
+             'obs': {'name': 'observed', 'fullname': 'observed profile',
+             'filter': 'observed*.nc'}}
+        self.fname_atmos = self.getFileName(typedict=self.filetypes['atm'])
 
         # ---- initialise UI ----
         self.initUI()
@@ -46,6 +56,8 @@ class Window(QMainWindow):
 
 
         # ---- initialise canvas ----
+        pg.setConfigOption('background', 'w')
+        pg.setConfigOption('foreground', 'k')
         self.canvas = pg.GraphicsLayoutWidget()
         self.setCentralWidget(self.canvas)
         # row 0
@@ -56,6 +68,7 @@ class Window(QMainWindow):
         self.panel10 = self.canvas.addPlot(row=1, col=0)
         self.panel11 = self.canvas.addPlot(row=1, col=1)
         self.panel12 = self.canvas.addPlot(row=1, col=2)
+
         # Place ImageItem() into plot windows
         self.img00 = pg.ImageItem()
         self.img01 = pg.ImageItem()
@@ -100,7 +113,7 @@ class Window(QMainWindow):
         self.show()
 
     def initModel(self):
-        self.m = sp.model(self.mfile)
+        self.m = sp.model(self.fname_atmos)
         self.nx = self.m.nx
         self.ny = self.m.ny
         self.itau = -1
@@ -141,6 +154,16 @@ class Window(QMainWindow):
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
 
+    def getFileName(self, typedict=None):
+        filename, _ = QFileDialog.getOpenFileName(self, 
+            "Please select the input {0} file".format(typedict['name']), os.getcwd(), 
+            "STiC {0} file ({1})".format(typedict['fullname'],
+                typedict['filter']))
+        if filename:
+            return filename
+        else:
+            print("getFileName [error]: {0} file required to launch STiCViewer".format(typedict['fullname']))
+            sys.exit()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
