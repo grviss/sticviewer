@@ -107,17 +107,23 @@ class Window(QMainWindow):
 
     def setlimits(self):
         self.panel00.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                maxXRange=self.nx, maxYRange=self.ny)
+                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
+                maxYRange=self.ny)
         self.panel01.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                maxXRange=self.nx, maxYRange=self.ny)
+                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
+                maxYRange=self.ny)
         self.panel02.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                maxXRange=self.nx, maxYRange=self.ny)
+                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
+                maxYRange=self.ny)
         self.panel10.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                maxXRange=self.nx, maxYRange=self.ny)
+                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
+                maxYRange=self.ny)
         self.panel11.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                maxXRange=self.nx, maxYRange=self.ny)
+                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
+                maxYRange=self.ny)
         self.panel12.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                maxXRange=self.nx, maxYRange=self.ny)
+                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
+                maxYRange=self.ny)
 
 
 if __name__ == '__main__':
