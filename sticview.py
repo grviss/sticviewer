@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, qApp,
-QVBoxLayout, QFileDialog)
+QVBoxLayout, QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
+QSlider, QLabel, QGridLayout, QSpacerItem, QSizePolicy)
 from PyQt5 import QtCore
 import pyqtgraph as pg
 
@@ -20,6 +21,47 @@ def mplcm_to_pglut(cm_name):
     cmap._init()
     lut = (cmap._lut * 255).view(np.ndarray)
     return lut
+
+class Slider(QWidget):
+    def __init__(self, label, vmin, vmax, step, initval, parent=None):
+        super(Slider, self).__init__(parent=parent)
+        # Create elements
+        self.slider = QSlider(self)
+        self.labelname = QLabel(self)
+        self.labelvalue = QLabel(self)
+        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.slider.setSingleStep(step/2.)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.labelname)
+        self.layout.addWidget(self.slider)
+        self.layout.addWidget(self.labelvalue)
+
+        self.vmin = vmin
+        self.vmax = vmax
+        self.sval = None
+
+        self.slider.valueChanged.connect(self.getValue)
+
+        self.labelname.setText(label)
+        self.setValue(initval)
+
+    def getValue(self, value):
+        self.sval = self.vmin + (float(self.slider.value()) /
+            np.abs(self.slider.maximum() - self.slider.minimum())) * np.abs(self.vmax -
+                self.vmin)
+        self.setLabelValue()
+
+    def setValue(self, value):
+        self.sval = value
+        slidervalue = (self.sval - self.vmin) / np.abs(self.vmax - self.vmin) \
+            * np.abs(self.slider.maximum() - self.slider.minimum())
+
+        self.slider.setValue(slidervalue)
+        self.setLabelValue()
+
+    def setLabelValue(self):
+        self.labelvalue.setText("{0:.4g}".format(self.sval))
 
 
 class Window(QMainWindow):
@@ -38,13 +80,14 @@ class Window(QMainWindow):
              'filter': 'observed*.nc'}}
         self.fname_atmos = self.getFileName(typedict=self.filetypes['atm'])
 
+        # ---- initialise input ----
+        self.initModel()
+
         # ---- initialise UI ----
         self.initUI()
 
-        # ---- initialise UI ----
-        self.initModel()
-
         # ---- initial draw ----
+        self.setlimits()
         self.drawModel()
 #        self.canvas.draw()
 
@@ -54,12 +97,34 @@ class Window(QMainWindow):
         self.setGeometry(0, 0, 1200, 1000)
         self.setWindowTitle('STiC Viewer')
 
+        # ---- set up control panel ----
+        cpanel_layout = QVBoxLayout()
+
+        self.zslider = Slider('Optical depth', self.ltaus.min(),
+                self.ltaus.max(), np.diff(self.ltaus).mean(),
+                self.ltaus[self.itau])
+        self.zslider.slider.valueChanged.connect(self.updateDepth)
+        cpanel_layout.addWidget(self.zslider)
+        spacerItem = QSpacerItem(50, 50, QSizePolicy.Minimum,
+                QSizePolicy.Expanding)
+        cpanel_layout.addItem(spacerItem)
+
+        cpanel = QWidget()
+        cpanel.setLayout(cpanel_layout)
 
         # ---- initialise canvas ----
         pg.setConfigOption('background', 'w')
         pg.setConfigOption('foreground', 'k')
+
+
         self.canvas = pg.GraphicsLayoutWidget()
-        self.setCentralWidget(self.canvas)
+#        self.setCentralWidget(self.canvas)
+        layout = QHBoxLayout()
+        layout.addWidget(cpanel)
+        layout.addWidget(self.canvas)
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
         # row 0
         self.panel00 = self.canvas.addPlot(row=0, col=0)
         self.panel01 = self.canvas.addPlot(row=0, col=1)
@@ -117,10 +182,10 @@ class Window(QMainWindow):
         self.nx = self.m.nx
         self.ny = self.m.ny
         self.itau = -1
+        self.ltaus = self.m.ltau[0,0,0,:]
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
 
-        self.setlimits()
 
     def drawModel(self):
         self.img00.setImage(self.m.temp[0,:,:,self.itau])
@@ -168,6 +233,13 @@ class Window(QMainWindow):
             print("{0} [error]: {1} file required to launch " \
                     "STiCViewer".format(inam, typedict['fullname']))
             sys.exit()
+
+    def updateDepth(self):
+        self.itau = np.argmin(np.abs(self.ltaus-self.zslider.sval))
+        self.drawModel()
+
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
