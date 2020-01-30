@@ -25,14 +25,14 @@ def mplcm_to_pglut(cm_name):
     return lut
 
 class Slider(QWidget):
-    def __init__(self, label, vmin, vmax, step, initval, parent=None):
+    def __init__(self, label, vmin, vmax, step, initval, intslider=False, parent=None):
         super(Slider, self).__init__(parent=parent)
         # Create elements
         self.slider = QSlider(self)
         self.labelname = QLabel(self)
         self.labelvalue = QLabel(self)
         self.slider.setOrientation(QtCore.Qt.Horizontal)
-        self.slider.setSingleStep(step/2.)
+        self.slider.setSingleStep(step)
 
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.labelname)
@@ -41,29 +41,54 @@ class Slider(QWidget):
 
         self.vmin = vmin
         self.vmax = vmax
+        if self.vmax == self.vmin:
+            self.vmax += 1
         self.sval = None
 
-        self.slider.valueChanged.connect(self.getValue)
+        if intslider is True:
+            self.slider.setMinimum(self.vmin)
+            self.slider.setMaximum(self.vmax)
+            self.slider.valueChanged.connect(self.getValue)
+            self.setValue(initval)
+        else:
+            self.slider.valueChanged.connect(self.getFValue)
+            self.setFValue(initval)
 
         self.labelname.setText(label)
-        self.setValue(initval)
 
     def getValue(self, value):
+        self.sval = np.int(self.vmin + (float(self.slider.value()) /
+            np.abs(self.slider.maximum() - self.slider.minimum())) * np.abs(self.vmax -
+                self.vmin))
+        self.setLabelValue(intslider=True)
+
+    def setValue(self, value):
+        self.sval = value
+        print(self.sval)
+        slidervalue = np.int((self.sval - self.vmin) / np.abs(self.vmax - self.vmin) \
+            * np.abs(self.slider.maximum() - self.slider.minimum()))
+        print(slidervalue)
+        self.slider.setValue(slidervalue)
+        self.setLabelValue(intslider=True)
+
+    def getFValue(self, value):
         self.sval = self.vmin + (float(self.slider.value()) /
             np.abs(self.slider.maximum() - self.slider.minimum())) * np.abs(self.vmax -
                 self.vmin)
         self.setLabelValue()
 
-    def setValue(self, value):
+    def setFValue(self, value):
         self.sval = value
         slidervalue = (self.sval - self.vmin) / np.abs(self.vmax - self.vmin) \
             * np.abs(self.slider.maximum() - self.slider.minimum())
-
         self.slider.setValue(slidervalue)
         self.setLabelValue()
 
-    def setLabelValue(self):
-        self.labelvalue.setText("{0:.4g}".format(self.sval))
+    def setLabelValue(self, intslider=False):
+        if intslider is False:
+            self.labelvalue.setText("{0:.4g}".format(self.sval))
+        else:
+            self.labelvalue.setText("{0}".format(self.sval))
 
 
 class Window(QMainWindow):
@@ -108,16 +133,22 @@ class Window(QMainWindow):
         # ---- set up control panel ----
         cpanel_layout = QVBoxLayout()
 
-        self.zslider = Slider('Optical depth (log('+u"τ"+'))', self.ltaus.min(),
-                self.ltaus.max(), np.diff(self.ltaus).mean(),
+        self.zslider = Slider('Optical depth [log('+u"τ"+'])', self.ltaus.min(),
+                self.ltaus.max(), np.diff(self.ltaus).mean()/2.,
                 self.ltaus[self.itau])
         self.zslider.slider.valueChanged.connect(self.updateDepth)
-        self.tslider = Slider('Time', 0, self.nt, 1, 0)
+        self.tslider = Slider('Time [index]', 0, self.nt-1, 1, 0, intslider=True)
         if self.nt:
             self.tslider.setDisabled(True)
-        self.zslider.slider.valueChanged.connect(self.updateTime)
+        self.tslider.slider.valueChanged.connect(self.updateTime)
+
+        self.wslider = Slider('Wavelength [index]', 0, self.nw-1, 1, 0,
+                intslider=True)
+        self.wslider.slider.valueChanged.connect(self.updateWave)
+
         cpanel_layout.addWidget(self.zslider)
         cpanel_layout.addWidget(self.tslider)
+        cpanel_layout.addWidget(self.wslider)
         spacerItem = QSpacerItem(50, 50, QSizePolicy.Minimum,
                 QSizePolicy.Expanding)
         cpanel_layout.addItem(spacerItem)
@@ -203,7 +234,7 @@ class Window(QMainWindow):
         exitButton.setShortcut('Ctrl+Q')
         exitButton.triggered.connect(qApp.quit)
         filemenu.addAction(exitButton)
-       
+
         # ---- show GUI ----
         self.show()
 
@@ -223,6 +254,7 @@ class Window(QMainWindow):
         self.wsel = np.where(self.s.dat[0,0,0,:,0] > 0)[0]
         self.synprof = self.s.dat[:,:,:,self.wsel,:]
         self.wav = self.s.wav
+        self.nw = self.wsel.size
         self.iwav = 0
         self.istokes = 0
 
@@ -308,6 +340,11 @@ class Window(QMainWindow):
     def updateTime(self):
         self.tt = self.tslider.sval
         self.drawModel()
+        self.drawSynth()
+        self.drawObs()
+
+    def updateWave(self):
+        self.iwav = self.wslider.sval
         self.drawSynth()
         self.drawObs()
 
