@@ -120,12 +120,13 @@ class Window(QMainWindow):
         self.drawModel()
         self.drawSynth()
         self.drawObs()
+        self.plotModel()
 #        self.canvas.draw()
 
 
     def initUI(self):
         # ----- initialise window ----
-        self.setGeometry(0, 0, 1200, 1000)
+        self.setGeometry(0, 0, 1400, 1000)
         self.setWindowTitle('STiC Viewer')
 
         # ---- set up control panel ----
@@ -158,28 +159,31 @@ class Window(QMainWindow):
         # ---- initialise canvas ----
         pg.setConfigOption('background', 'w')
         pg.setConfigOption('foreground', 'k')
+        self.invpen = pg.mkPen('r', width=3)
 
-
-        self.canvas = pg.GraphicsLayoutWidget()
+        self.icanvas = pg.GraphicsLayoutWidget()
+        self.pcanvas = pg.GraphicsLayoutWidget()
+        self.pcanvas.setFixedWidth(600)
 #        self.setCentralWidget(self.canvas)
         layout = QHBoxLayout()
         layout.addWidget(cpanel)
-        layout.addWidget(self.canvas)
+        layout.addWidget(self.icanvas)
+        layout.addWidget(self.pcanvas)
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         # row 0
-        self.panel00 = self.canvas.addPlot(row=0, col=0)
-        self.panel01 = self.canvas.addPlot(row=0, col=1)
-        self.panel02 = self.canvas.addPlot(row=0, col=2)
+        self.panel00 = self.icanvas.addPlot(row=0, col=0)
+        self.panel01 = self.icanvas.addPlot(row=0, col=1)
+        self.panel02 = self.icanvas.addPlot(row=0, col=2)
         # row 1
-        self.panel10 = self.canvas.addPlot(row=1, col=0)
-        self.panel11 = self.canvas.addPlot(row=1, col=1)
-        self.panel12 = self.canvas.addPlot(row=1, col=2)
+        self.panel10 = self.icanvas.addPlot(row=1, col=0)
+        self.panel11 = self.icanvas.addPlot(row=1, col=1)
+        self.panel12 = self.icanvas.addPlot(row=1, col=2)
         # row 2
-        self.panel20 = self.canvas.addPlot(row=2, col=0)
-        self.panel21 = self.canvas.addPlot(row=2, col=1)
-        self.panel22 = self.canvas.addPlot(row=2, col=2)
+        self.panel20 = self.icanvas.addPlot(row=2, col=0)
+        self.panel21 = self.icanvas.addPlot(row=2, col=1)
+        self.panel22 = self.icanvas.addPlot(row=2, col=2)
 
         # Place ImageItem() into plot windows
         self.img00 = pg.ImageItem()
@@ -224,6 +228,44 @@ class Window(QMainWindow):
         self.linkviews(self.panel00, self.panel21)
         self.linkviews(self.panel00, self.panel22)
 
+
+        # Fill plot canvas
+        self.panelp00 = self.pcanvas.addPlot(row=0, col=0)
+        self.panelp01 = self.pcanvas.addPlot(row=0, col=1)
+        self.panelp10 = self.pcanvas.addPlot(row=1, col=0)
+        self.panelp11 = self.pcanvas.addPlot(row=1, col=1)
+        self.panelp20 = self.pcanvas.addPlot(row=2, col=0)
+        self.panelp21 = self.pcanvas.addPlot(row=2, col=1)
+
+        plotwidth = 275
+        self.panelp00.setFixedWidth(plotwidth)
+        self.panelp01.setFixedWidth(plotwidth)
+        self.panelp10.setFixedWidth(plotwidth)
+        self.panelp11.setFixedWidth(plotwidth)
+        self.panelp20.setFixedWidth(plotwidth)
+        self.panelp21.setFixedWidth(plotwidth)
+
+        self.panelp00.showGrid(x=True, y=True)
+        self.panelp01.showGrid(x=True, y=True)
+        self.panelp00.setLabel('left', 'T [kK]')
+        self.panelp00.setLabel('bottom', 'log('+u"τ"+')')
+        self.panelp01.setLabel('left', 'v_los [km/s]')
+        self.panelp01.setLabel('bottom', 'log('+u"τ"+')')
+
+#        self.plot00 = pg.PlotItem()
+#        self.plot01 = pg.PlotItem()
+#        self.plot10 = pg.PlotItem()
+#        self.plot11 = pg.PlotItem()
+#        self.plot20 = pg.PlotItem()
+#        self.plot21 = pg.PlotItem()
+#
+#        self.panelp00.addItem(self.plot00)
+#        self.panelp01.addItem(self.plot01)
+#        self.panelp10.addItem(self.plot20)
+#        self.panelp11.addItem(self.plot21)
+#        self.panelp20.addItem(self.plot20)
+#        self.panelp21.addItem(self.plot21)
+
         # ----- initialise menubar ----
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
@@ -245,6 +287,10 @@ class Window(QMainWindow):
         self.tt = 0
         self.nt = self.m.nt
         self.ltaus = self.m.ltau[0,0,0,:]
+
+        self.m.azi *= 180./np.pi
+        self.m.vturb *= 1.e-5
+        self.m.vlos *= 1.e-5
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
 
@@ -276,6 +322,12 @@ class Window(QMainWindow):
         self.img10.setImage(self.m.Bln[self.tt,:,:,self.itau])
         self.img11.setImage(self.m.Bho[self.tt,:,:,self.itau])
         self.img12.setImage(self.m.azi[self.tt,:,:,self.itau])
+
+    def plotModel(self):
+        self.panelp00.plot(self.ltaus, self.m.temp[self.tt,0,0,:]/1.e3,
+                pen=self.invpen)
+        self.panelp01.plot(self.ltaus, self.m.vlos[self.tt,0,0,:],
+                pen=self.invpen)
 
     def drawSynth(self):
         self.img21.setImage(self.synprof[self.tt,:,:,self.iwav,self.istokes])
@@ -341,6 +393,7 @@ class Window(QMainWindow):
         self.drawModel()
         self.drawSynth()
         self.drawObs()
+        self.plotModel()
 
     def updateWave(self):
         self.iwav = self.wslider.sval
