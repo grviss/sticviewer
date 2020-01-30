@@ -25,13 +25,18 @@ def mplcm_to_pglut(cm_name):
     return lut
 
 class CWImage(QWidget):
-    def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', parent=None):
+    def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', nx=None,
+            ny=None, parent=None):
         super(CWImage, self).__init__(parent=parent)
         self.container = canvas.addPlot(row=row, col=col)
         self.img = pg.ImageItem()
         self.img.setLookupTable(mplcm_to_pglut(cm_name))
 
         self.container.addItem(self.img)
+        if (nx is not None) and (ny is not None):
+            self.container.setLimits(xMin=0, xMax=nx, yMin=0, yMax=ny,
+                    minXRange=nx/10, minYRange=ny/10, maxXRange=nx,
+                    maxYRange=ny)
 
 
 class Slider(QWidget):
@@ -126,7 +131,6 @@ class Window(QMainWindow):
         self.initUI()
 
         # ---- initial draw ----
-        self.setlimits()
         self.drawModel()
         self.drawSynth()
         self.drawObs()
@@ -185,17 +189,26 @@ class Window(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         # row 0
-        self.panel00 = CWImage(self.icanvas, row=0, col=0, cm_name='gist_heat')
-        self.panel01 = CWImage(self.icanvas, row=0, col=1, cm_name='bwr')
-        self.panel02 = CWImage(self.icanvas, row=0, col=2)
+        self.panel00 = CWImage(self.icanvas, row=0, col=0, nx=self.nx,
+                ny=self.ny, cm_name='gist_heat')
+        self.panel01 = CWImage(self.icanvas, row=0, col=1, nx=self.nx,
+                ny=self.ny, cm_name='bwr')
+        self.panel02 = CWImage(self.icanvas, row=0, col=2, nx=self.nx,
+                ny=self.ny)
         # row 1
-        self.panel10 = CWImage(self.icanvas, row=1, col=0, cm_name='RdGy_r')
-        self.panel11 = CWImage(self.icanvas, row=1, col=1, cm_name='Oranges')
-        self.panel12 = CWImage(self.icanvas, row=1, col=2, cm_name='Greens')
+        self.panel10 = CWImage(self.icanvas, row=1, col=0, nx=self.nx,
+                ny=self.ny, cm_name='RdGy_r')
+        self.panel11 = CWImage(self.icanvas, row=1, col=1, nx=self.nx,
+                ny=self.ny, cm_name='Oranges')
+        self.panel12 = CWImage(self.icanvas, row=1, col=2, nx=self.nx,
+                ny=self.ny, cm_name='Greens')
         # row 2
-        self.panel20 = CWImage(self.icanvas, row=2, col=0)
-        self.panel21 = CWImage(self.icanvas, row=2, col=1, cm_name='Blues_r')
-        self.panel22 = CWImage(self.icanvas, row=2, col=2, cm_name='copper')
+        self.panel20 = CWImage(self.icanvas, row=2, col=0, nx=self.nx,
+                ny=self.ny)
+        self.panel21 = CWImage(self.icanvas, row=2, col=1, nx=self.nx,
+                ny=self.ny, cm_name='Blues_r')
+        self.panel22 = CWImage(self.icanvas, row=2, col=2, nx=self.nx,
+                ny=self.ny, cm_name='copper')
 
         # Link panel views
         self.linkviews(self.panel00.container, self.panel01.container)
@@ -342,35 +355,6 @@ class Window(QMainWindow):
     def linkviews(self, anchorview, view):
         view.setXLink(anchorview)
         view.setYLink(anchorview)
-
-    def setlimits(self):
-        self.panel00.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel01.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel02.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel10.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel11.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel12.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel20.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel21.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
-        self.panel22.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-                maxYRange=self.ny)
 
     def getFileName(self, typedict=None):
         inam = 'getFileName'
