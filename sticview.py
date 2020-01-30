@@ -171,7 +171,6 @@ class Window(QMainWindow):
         self.plotModel()
         self.plotObs()
         self.plotSynth()
-#        self.canvas.draw()
 
 
     def initUI(self):
@@ -264,6 +263,16 @@ class Window(QMainWindow):
         self.panelp11 = self.pcanvas.addPlot(row=1, col=1)
         self.panelp20 = self.pcanvas.addPlot(row=2, col=0)
         self.panelp21 = self.pcanvas.addPlot(row=2, col=1)
+        self.tinv = self.panelp00.plot()
+        self.vinv = self.panelp01.plot()
+        self.iobs = self.panelp10.plot()
+        self.isyn = self.panelp10.plot()
+        self.qobs = self.panelp11.plot()
+        self.qsyn = self.panelp11.plot()
+        self.uobs = self.panelp20.plot()
+        self.usyn = self.panelp20.plot()
+        self.vobs = self.panelp21.plot()
+        self.vsyn = self.panelp21.plot()
 
         plotwidth = 275
         self.panelp00.setFixedWidth(plotwidth)
@@ -358,22 +367,22 @@ class Window(QMainWindow):
         self.panel12.img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def plotModel(self):
-        self.panelp00.plot(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
+        self.tinv.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
                 pen=self.invpen)
-        self.panelp01.plot(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
+        self.vinv.setData(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
                 pen=self.invpen)
 
     def drawSynth(self):
         self.panel21.img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
 
     def plotSynth(self):
-        self.panelp10.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,0],
+        self.isyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,0],
                 pen=self.invpen)
-        self.panelp11.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,1],
+        self.qsyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,1],
                 pen=self.invpen)
-        self.panelp20.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,2],
+        self.usyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,2],
                 pen=self.invpen)
-        self.panelp21.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,3],
+        self.vsyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,3],
                 pen=self.invpen)
 
     def drawObs(self):
@@ -381,13 +390,13 @@ class Window(QMainWindow):
         self.panel22.img.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def plotObs(self):
-        self.panelp10.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,0],
+        self.iobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,0],
                 symbol='o', symbolPen='k')
-        self.panelp11.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,1],
+        self.qobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,1],
                 symbol='o', symbolPen='k')
-        self.panelp20.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,2],
+        self.uobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,2],
                 symbol='o', symbolPen='k')
-        self.panelp21.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,3],
+        self.vobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,3],
                 symbol='o', symbolPen='k')
 
     def linkviews(self, anchorview, view):
