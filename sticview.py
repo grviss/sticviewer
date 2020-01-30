@@ -33,10 +33,44 @@ class CWImage(QWidget):
         self.img.setLookupTable(mplcm_to_pglut(cm_name))
 
         self.box.addItem(self.img)
-        if (nx is not None) and (ny is not None):
-            self.box.setLimits(xMin=0, xMax=nx, yMin=0, yMax=ny,
-                    minXRange=nx/10, minYRange=ny/10, maxXRange=nx,
-                    maxYRange=ny)
+        if (parent is not None):
+            self.box.setLimits(xMin=0, xMax=parent.nx, yMin=0, yMax=parent.ny,
+                    minXRange=parent.nx/10, minYRange=parent.ny/10,
+                    maxXRange=parent.nx, maxYRange=parent.ny)
+
+        # Handle crosshairs
+        self.vLine = pg.InfiniteLine(pen=pg.mkPen('w'), angle=90, movable=False)
+        self.hLine = pg.InfiniteLine(pen=pg.mkPen('w'), angle=0, movable=False)
+        self.box.addItem(self.vLine, ignoreBounds=True)
+        self.box.addItem(self.hLine, ignoreBounds=True)
+
+        self.vLine.setPos(parent.nx/2)
+        self.hLine.setPos(parent.ny/2)
+
+        self.nx = parent.nx
+        self.ny = parent.ny
+
+        self.proxy = pg.SignalProxy(self.box.scene().sigMouseMoved, rateLimit=60,
+                    slot=self.mouseMoved)
+
+    def mouseMoved(self, event):
+        pos = event[0]
+        if self.box.sceneBoundingRect().contains(pos):
+            mousePoint = self.box.vb.mapSceneToView(pos)
+            self.xx = np.int(np.round(mousePoint.x()))
+            self.yy = np.int(np.round(mousePoint.y()))
+            # Ensure crosshairs within map
+            self.xx = 0 if self.xx < 0 else self.nx-1 if self.xx >= self.nx else self.xx
+            self.yy = 0 if self.yy < 0 else self.ny-1 if self.yy >= self.ny else self.yy
+            # Place crosshairs at right position
+            self.vLine.setPos(self.xx)
+            self.hLine.setPos(self.yy)
+            self.parent().xx = self.xx
+            self.parent().yy = self.yy
+            # Update plots
+            self.parent().plotModel()
+            self.parent().plotSynth()
+            self.parent().plotObs()
 
 
 class Slider(QWidget):
@@ -189,26 +223,24 @@ class Window(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         # row 0
-        self.panel00 = CWImage(self.icanvas, row=0, col=0, nx=self.nx,
-                ny=self.ny, cm_name='gist_heat')
-        self.panel01 = CWImage(self.icanvas, row=0, col=1, nx=self.nx,
-                ny=self.ny, cm_name='bwr')
-        self.panel02 = CWImage(self.icanvas, row=0, col=2, nx=self.nx,
-                ny=self.ny)
+        self.panel00 = CWImage(self.icanvas, row=0, col=0, cm_name='gist_heat',
+                parent=self)
+        self.panel01 = CWImage(self.icanvas, row=0, col=1, cm_name='bwr',
+                parent=self)
+        self.panel02 = CWImage(self.icanvas, row=0, col=2, parent=self)
         # row 1
-        self.panel10 = CWImage(self.icanvas, row=1, col=0, nx=self.nx,
-                ny=self.ny, cm_name='RdGy_r')
-        self.panel11 = CWImage(self.icanvas, row=1, col=1, nx=self.nx,
-                ny=self.ny, cm_name='Oranges')
-        self.panel12 = CWImage(self.icanvas, row=1, col=2, nx=self.nx,
-                ny=self.ny, cm_name='Greens')
+        self.panel10 = CWImage(self.icanvas, row=1, col=0, cm_name='RdGy_r',
+                parent=self)
+        self.panel11 = CWImage(self.icanvas, row=1, col=1, cm_name='Oranges',
+                parent=self)
+        self.panel12 = CWImage(self.icanvas, row=1, col=2, cm_name='Greens',
+                parent=self)
         # row 2
-        self.panel20 = CWImage(self.icanvas, row=2, col=0, nx=self.nx,
-                ny=self.ny)
-        self.panel21 = CWImage(self.icanvas, row=2, col=1, nx=self.nx,
-                ny=self.ny, cm_name='Blues_r')
-        self.panel22 = CWImage(self.icanvas, row=2, col=2, nx=self.nx,
-                ny=self.ny, cm_name='copper')
+        self.panel20 = CWImage(self.icanvas, row=2, col=0, parent=self)
+        self.panel21 = CWImage(self.icanvas, row=2, col=1, cm_name='Blues_r',
+                parent=self)
+        self.panel22 = CWImage(self.icanvas, row=2, col=2, cm_name='copper',
+                parent=self)
 
         # Link panel views
         self.linkviews(self.panel00.box, self.panel01.box)
@@ -219,6 +251,10 @@ class Window(QMainWindow):
         self.linkviews(self.panel00.box, self.panel20.box)
         self.linkviews(self.panel00.box, self.panel21.box)
         self.linkviews(self.panel00.box, self.panel22.box)
+
+        # Listen to cursor movement
+#        proxy = pg.SignalProxy(self.panel00.box.scene().sigMouseMoved, rateLimit=60,
+#                slot=self.panel00.mouseMoved)
 
 
         # Fill plot canvas
@@ -280,6 +316,8 @@ class Window(QMainWindow):
         self.ny = self.m.ny
         self.itau = -1
         self.tt = 0
+        self.xx = np.int(self.nx/2)
+        self.yy = np.int(self.ny/2)
         self.nt = self.m.nt
         self.ltaus = self.m.ltau[0,0,0,:]
 
@@ -320,22 +358,22 @@ class Window(QMainWindow):
         self.panel12.img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def plotModel(self):
-        self.panelp00.plot(self.ltaus, self.m.temp[self.tt,0,0,:]/1.e3,
+        self.panelp00.plot(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
                 pen=self.invpen)
-        self.panelp01.plot(self.ltaus, self.m.vlos[self.tt,0,0,:],
+        self.panelp01.plot(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
                 pen=self.invpen)
 
     def drawSynth(self):
         self.panel21.img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
 
     def plotSynth(self):
-        self.panelp10.plot(self.wav, self.synprof[self.tt,0,0,:,0],
+        self.panelp10.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,0],
                 pen=self.invpen)
-        self.panelp11.plot(self.wav, self.synprof[self.tt,0,0,:,1],
+        self.panelp11.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,1],
                 pen=self.invpen)
-        self.panelp20.plot(self.wav, self.synprof[self.tt,0,0,:,2],
+        self.panelp20.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,2],
                 pen=self.invpen)
-        self.panelp21.plot(self.wav, self.synprof[self.tt,0,0,:,3],
+        self.panelp21.plot(self.wav, self.synprof[self.tt,self.yy,self.xx,:,3],
                 pen=self.invpen)
 
     def drawObs(self):
@@ -343,13 +381,13 @@ class Window(QMainWindow):
         self.panel22.img.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def plotObs(self):
-        self.panelp10.plot(self.wav, self.obsprof[self.tt,0,0,:,0],
+        self.panelp10.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,0],
                 symbol='o', symbolPen='k')
-        self.panelp11.plot(self.wav, self.obsprof[self.tt,0,0,:,1],
+        self.panelp11.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,1],
                 symbol='o', symbolPen='k')
-        self.panelp20.plot(self.wav, self.obsprof[self.tt,0,0,:,2],
+        self.panelp20.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,2],
                 symbol='o', symbolPen='k')
-        self.panelp21.plot(self.wav, self.obsprof[self.tt,0,0,:,3],
+        self.panelp21.plot(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,3],
                 symbol='o', symbolPen='k')
 
     def linkviews(self, anchorview, view):
@@ -393,7 +431,6 @@ class Window(QMainWindow):
         self.wQLine.setPos(self.wav[self.ww])
         self.wULine.setPos(self.wav[self.ww])
         self.wVLine.setPos(self.wav[self.ww])
-
 
 
 
