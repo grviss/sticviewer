@@ -121,6 +121,7 @@ class Window(QMainWindow):
         self.drawSynth()
         self.drawObs()
         self.plotModel()
+        self.plotObs()
         self.plotSynth()
 #        self.canvas.draw()
 
@@ -332,6 +333,16 @@ class Window(QMainWindow):
     def drawObs(self):
         self.img20.setImage(self.obsprof[self.tt,:,:,self.iwav,self.istokes])
         self.img22.setImage(self.chi2[self.tt,:,:, self.istokes])
+
+    def plotObs(self):
+        self.panelp10.plot(self.wav, self.obsprof[self.tt,0,0,:,0],
+                symbol='o', symbolPen='k')
+        self.panelp11.plot(self.wav, self.obsprof[self.tt,0,0,:,1],
+                symbol='o', symbolPen='k')
+        self.panelp20.plot(self.wav, self.obsprof[self.tt,0,0,:,2],
+                symbol='o', symbolPen='k')
+        self.panelp21.plot(self.wav, self.obsprof[self.tt,0,0,:,3],
+                symbol='o', symbolPen='k')
 
     def linkviews(self, anchorview, view):
         view.setXLink(anchorview)
