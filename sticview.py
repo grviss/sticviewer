@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import os
 import sys
 
@@ -100,7 +102,7 @@ class Window(QMainWindow):
         # ---- set up control panel ----
         cpanel_layout = QVBoxLayout()
 
-        self.zslider = Slider('Optical depth', self.ltaus.min(),
+        self.zslider = Slider('Optical depth (log('+u"τ"+'))', self.ltaus.min(),
                 self.ltaus.max(), np.diff(self.ltaus).mean(),
                 self.ltaus[self.itau])
         self.zslider.slider.valueChanged.connect(self.updateDepth)
