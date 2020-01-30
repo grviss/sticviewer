@@ -254,6 +254,12 @@ class Window(QMainWindow):
         self.panelp01.setLabel('left', 'v_los [km/s]')
         self.panelp01.setLabel('bottom', 'log('+u"τ"+')')
 
+        # Link plot panel views
+        self.panelp01.setXLink(self.panelp00)
+        self.panelp11.setXLink(self.panelp10)
+        self.panelp20.setXLink(self.panelp10)
+        self.panelp21.setXLink(self.panelp10)
+
         # ----- initialise menubar ----
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
