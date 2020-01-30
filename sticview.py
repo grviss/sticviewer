@@ -121,6 +121,7 @@ class Window(QMainWindow):
         self.drawSynth()
         self.drawObs()
         self.plotModel()
+        self.plotSynth()
 #        self.canvas.draw()
 
 
@@ -252,20 +253,6 @@ class Window(QMainWindow):
         self.panelp01.setLabel('left', 'v_los [km/s]')
         self.panelp01.setLabel('bottom', 'log('+u"τ"+')')
 
-#        self.plot00 = pg.PlotItem()
-#        self.plot01 = pg.PlotItem()
-#        self.plot10 = pg.PlotItem()
-#        self.plot11 = pg.PlotItem()
-#        self.plot20 = pg.PlotItem()
-#        self.plot21 = pg.PlotItem()
-#
-#        self.panelp00.addItem(self.plot00)
-#        self.panelp01.addItem(self.plot01)
-#        self.panelp10.addItem(self.plot20)
-#        self.panelp11.addItem(self.plot21)
-#        self.panelp20.addItem(self.plot20)
-#        self.panelp21.addItem(self.plot21)
-
         # ----- initialise menubar ----
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
@@ -331,6 +318,16 @@ class Window(QMainWindow):
 
     def drawSynth(self):
         self.img21.setImage(self.synprof[self.tt,:,:,self.iwav,self.istokes])
+
+    def plotSynth(self):
+        self.panelp10.plot(self.wav, self.synprof[self.tt,0,0,:,0],
+                pen=self.invpen)
+        self.panelp11.plot(self.wav, self.synprof[self.tt,0,0,:,1],
+                pen=self.invpen)
+        self.panelp20.plot(self.wav, self.synprof[self.tt,0,0,:,2],
+                pen=self.invpen)
+        self.panelp21.plot(self.wav, self.synprof[self.tt,0,0,:,3],
+                pen=self.invpen)
 
     def drawObs(self):
         self.img20.setImage(self.obsprof[self.tt,:,:,self.iwav,self.istokes])
