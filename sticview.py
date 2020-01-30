@@ -64,10 +64,8 @@ class Slider(QWidget):
 
     def setValue(self, value):
         self.sval = value
-        print(self.sval)
         slidervalue = np.int((self.sval - self.vmin) / np.abs(self.vmax - self.vmin) \
             * np.abs(self.slider.maximum() - self.slider.minimum()))
-        print(slidervalue)
         self.slider.setValue(slidervalue)
         self.setLabelValue(intslider=True)
 
@@ -154,6 +152,7 @@ class Window(QMainWindow):
         cpanel_layout.addItem(spacerItem)
 
         cpanel = QWidget()
+        cpanel.setGeometry(0,0,500,1000)
         cpanel.setLayout(cpanel_layout)
 
         # ---- initialise canvas ----
