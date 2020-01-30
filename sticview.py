@@ -106,7 +106,12 @@ class Window(QMainWindow):
                 self.ltaus.max(), np.diff(self.ltaus).mean(),
                 self.ltaus[self.itau])
         self.zslider.slider.valueChanged.connect(self.updateDepth)
+        self.tslider = Slider('Time', 0, self.nt, 1, 0)
+        if self.nt:
+            self.tslider.setDisabled(True)
+        self.zslider.slider.valueChanged.connect(self.updateTime)
         cpanel_layout.addWidget(self.zslider)
+        cpanel_layout.addWidget(self.tslider)
         spacerItem = QSpacerItem(50, 50, QSizePolicy.Minimum,
                 QSizePolicy.Expanding)
         cpanel_layout.addItem(spacerItem)
@@ -185,18 +190,20 @@ class Window(QMainWindow):
         self.nx = self.m.nx
         self.ny = self.m.ny
         self.itau = -1
+        self.tt = 0
+        self.nt = self.m.nt
         self.ltaus = self.m.ltau[0,0,0,:]
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
 
 
     def drawModel(self):
-        self.img00.setImage(self.m.temp[0,:,:,self.itau])
-        self.img01.setImage(self.m.vlos[0,:,:,self.itau])
-        self.img02.setImage(self.m.vturb[0,:,:,self.itau])
-        self.img10.setImage(self.m.Bln[0,:,:,self.itau])
-        self.img11.setImage(self.m.Bho[0,:,:,self.itau])
-        self.img12.setImage(self.m.azi[0,:,:,self.itau])
+        self.img00.setImage(self.m.temp[self.tt,:,:,self.itau])
+        self.img01.setImage(self.m.vlos[self.tt,:,:,self.itau])
+        self.img02.setImage(self.m.vturb[self.tt,:,:,self.itau])
+        self.img10.setImage(self.m.Bln[self.tt,:,:,self.itau])
+        self.img11.setImage(self.m.Bho[self.tt,:,:,self.itau])
+        self.img12.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def linkviews(self, anchorview, view):
         view.setXLink(anchorview)
@@ -241,6 +248,9 @@ class Window(QMainWindow):
         self.itau = np.argmin(np.abs(self.ltaus-self.zslider.sval))
         self.drawModel()
 
+    def updateTime(self):
+        self.tt = self.tslider.sval
+        self.drawModel()
 
 
 
