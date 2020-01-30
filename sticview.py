@@ -79,13 +79,15 @@ class Window(QMainWindow):
              'syn': {'name': 'synthetic', 'fullname': 'synthetic profile',
              'filter': 'synthetic*.nc'},
              'obs': {'name': 'observed', 'fullname': 'observed profile',
-             'filter': 'observed*.nc'}}
+             'filter': '*.nc'}}
         self.fname_atmos = self.getFileName(typedict=self.filetypes['atm'])
         self.fname_synth = self.getFileName(typedict=self.filetypes['syn'])
+        self.fname_obs = self.getFileName(typedict=self.filetypes['obs'])
 
         # ---- initialise input ----
         self.initModel()
         self.initSynth()
+        self.initObs()
 
         # ---- initialise UI ----
         self.initUI()
@@ -94,6 +96,7 @@ class Window(QMainWindow):
         self.setlimits()
         self.drawModel()
         self.drawSynth()
+        self.drawObs()
 #        self.canvas.draw()
 
 
@@ -146,7 +149,7 @@ class Window(QMainWindow):
         # row 2
         self.panel20 = self.canvas.addPlot(row=2, col=0)
         self.panel21 = self.canvas.addPlot(row=2, col=1)
-#        self.panel12 = self.canvas.addPlot(row=1, col=2)
+        self.panel22 = self.canvas.addPlot(row=2, col=2)
 
         # Place ImageItem() into plot windows
         self.img00 = pg.ImageItem()
@@ -157,7 +160,7 @@ class Window(QMainWindow):
         self.img12 = pg.ImageItem()
         self.img20 = pg.ImageItem()
         self.img21 = pg.ImageItem()
-#        self.img22 = pg.ImageItem()
+        self.img22 = pg.ImageItem()
 
         # Set cmaps
         self.img00.setLookupTable(mplcm_to_pglut('gist_heat'))
@@ -168,7 +171,7 @@ class Window(QMainWindow):
         self.img12.setLookupTable(mplcm_to_pglut('Greens'))
         self.img20.setLookupTable(mplcm_to_pglut('Reds_r'))
         self.img21.setLookupTable(mplcm_to_pglut('Blues_r'))
-#        self.img22.setLookupTable(mplcm_to_pglut('Greens'))
+        self.img22.setLookupTable(mplcm_to_pglut('copper'))
 
         # Add panels to GUI
         self.panel00.addItem(self.img00)
@@ -179,7 +182,7 @@ class Window(QMainWindow):
         self.panel12.addItem(self.img12)
         self.panel20.addItem(self.img20)
         self.panel21.addItem(self.img21)
-#        self.panel22.addItem(self.img22)
+        self.panel22.addItem(self.img22)
 
         # Link panel views
         self.linkviews(self.panel00, self.panel01)
@@ -189,7 +192,7 @@ class Window(QMainWindow):
         self.linkviews(self.panel00, self.panel12)
         self.linkviews(self.panel00, self.panel20)
         self.linkviews(self.panel00, self.panel21)
-#        self.linkviews(self.panel00, self.panel22)
+        self.linkviews(self.panel00, self.panel22)
 
         # ----- initialise menubar ----
         menubar = self.menuBar()
@@ -223,6 +226,17 @@ class Window(QMainWindow):
         self.iwav = 0
         self.istokes = 0
 
+    def initObs(self):
+        self.o = sp.profile(self.fname_obs)
+        self.obsprof = self.o.dat[:,:,:,self.wsel,:]
+        self.chi2 = (self.obsprof - self.synprof)**2
+        tt, yy, xx, ww, ss = np.where(self.synprof != 0)
+        self.chi2[tt,yy,xx,ww,ss] /= self.synprof[tt,yy,xx,ww,ss]
+        chi2max = self.chi2.max()
+        tt, yy, xx, ww, ss = np.where(self.synprof == 0)
+        self.chi2[tt,yy,xx,ww,ss] = chi2max
+        self.chi2 = np.sum(self.chi2, axis=3)
+
 
     def drawModel(self):
         self.img00.setImage(self.m.temp[self.tt,:,:,self.itau])
@@ -233,8 +247,11 @@ class Window(QMainWindow):
         self.img12.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def drawSynth(self):
-        self.img20.setImage(self.synprof[self.tt,:,:,self.iwav,self.istokes])
         self.img21.setImage(self.synprof[self.tt,:,:,self.iwav,self.istokes])
+
+    def drawObs(self):
+        self.img20.setImage(self.obsprof[self.tt,:,:,self.iwav,self.istokes])
+        self.img22.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def linkviews(self, anchorview, view):
         view.setXLink(anchorview)
@@ -265,9 +282,9 @@ class Window(QMainWindow):
         self.panel21.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-#        self.panel22.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
-#                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
-#                maxYRange=self.ny)
+        self.panel22.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+                minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
+                maxYRange=self.ny)
 
     def getFileName(self, typedict=None):
         inam = 'getFileName'
@@ -292,6 +309,7 @@ class Window(QMainWindow):
         self.tt = self.tslider.sval
         self.drawModel()
         self.drawSynth()
+        self.drawObs()
 
 
 
