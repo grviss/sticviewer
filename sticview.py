@@ -294,7 +294,7 @@ class Window(QMainWindow):
         self.synprof = self.s.dat[:,:,:,self.wsel,:]
         self.wav = self.s.wav
         self.nw = self.wsel.size
-        self.iwav = 0
+        self.ww = 0
         self.istokes = 0
 
     def initObs(self):
@@ -324,7 +324,7 @@ class Window(QMainWindow):
                 pen=self.invpen)
 
     def drawSynth(self):
-        self.img21.setImage(self.synprof[self.tt,:,:,self.iwav,self.istokes])
+        self.img21.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
 
     def plotSynth(self):
         self.panelp10.plot(self.wav, self.synprof[self.tt,0,0,:,0],
@@ -337,7 +337,7 @@ class Window(QMainWindow):
                 pen=self.invpen)
 
     def drawObs(self):
-        self.img20.setImage(self.obsprof[self.tt,:,:,self.iwav,self.istokes])
+        self.img20.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes])
         self.img22.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def plotObs(self):
@@ -410,7 +410,7 @@ class Window(QMainWindow):
         self.plotModel()
 
     def updateWave(self):
-        self.iwav = self.wslider.sval
+        self.ww = self.wslider.sval
         self.drawSynth()
         self.drawObs()
 
