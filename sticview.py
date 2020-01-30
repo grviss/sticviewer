@@ -28,13 +28,13 @@ class CWImage(QWidget):
     def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', nx=None,
             ny=None, parent=None):
         super(CWImage, self).__init__(parent=parent)
-        self.container = canvas.addPlot(row=row, col=col)
+        self.box = canvas.addPlot(row=row, col=col)
         self.img = pg.ImageItem()
         self.img.setLookupTable(mplcm_to_pglut(cm_name))
 
-        self.container.addItem(self.img)
+        self.box.addItem(self.img)
         if (nx is not None) and (ny is not None):
-            self.container.setLimits(xMin=0, xMax=nx, yMin=0, yMax=ny,
+            self.box.setLimits(xMin=0, xMax=nx, yMin=0, yMax=ny,
                     minXRange=nx/10, minYRange=ny/10, maxXRange=nx,
                     maxYRange=ny)
 
@@ -211,14 +211,14 @@ class Window(QMainWindow):
                 ny=self.ny, cm_name='copper')
 
         # Link panel views
-        self.linkviews(self.panel00.container, self.panel01.container)
-        self.linkviews(self.panel00.container, self.panel02.container)
-        self.linkviews(self.panel00.container, self.panel10.container)
-        self.linkviews(self.panel00.container, self.panel11.container)
-        self.linkviews(self.panel00.container, self.panel12.container)
-        self.linkviews(self.panel00.container, self.panel20.container)
-        self.linkviews(self.panel00.container, self.panel21.container)
-        self.linkviews(self.panel00.container, self.panel22.container)
+        self.linkviews(self.panel00.box, self.panel01.box)
+        self.linkviews(self.panel00.box, self.panel02.box)
+        self.linkviews(self.panel00.box, self.panel10.box)
+        self.linkviews(self.panel00.box, self.panel11.box)
+        self.linkviews(self.panel00.box, self.panel12.box)
+        self.linkviews(self.panel00.box, self.panel20.box)
+        self.linkviews(self.panel00.box, self.panel21.box)
+        self.linkviews(self.panel00.box, self.panel22.box)
 
 
         # Fill plot canvas
