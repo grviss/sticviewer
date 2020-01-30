@@ -24,6 +24,16 @@ def mplcm_to_pglut(cm_name):
     lut = (cmap._lut * 255).view(np.ndarray)
     return lut
 
+class CWImage(QWidget):
+    def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', parent=None):
+        super(CWImage, self).__init__(parent=parent)
+        self.container = canvas.addPlot(row=row, col=col)
+        self.img = pg.ImageItem()
+        self.img.setLookupTable(mplcm_to_pglut(cm_name))
+
+        self.container.addItem(self.img)
+
+
 class Slider(QWidget):
     def __init__(self, label, vmin, vmax, step, initval, intslider=False, parent=None):
         super(Slider, self).__init__(parent=parent)
@@ -175,60 +185,27 @@ class Window(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         # row 0
-        self.panel00 = self.icanvas.addPlot(row=0, col=0)
-        self.panel01 = self.icanvas.addPlot(row=0, col=1)
-        self.panel02 = self.icanvas.addPlot(row=0, col=2)
+        self.panel00 = CWImage(self.icanvas, row=0, col=0, cm_name='gist_heat')
+        self.panel01 = CWImage(self.icanvas, row=0, col=1, cm_name='bwr')
+        self.panel02 = CWImage(self.icanvas, row=0, col=2)
         # row 1
-        self.panel10 = self.icanvas.addPlot(row=1, col=0)
-        self.panel11 = self.icanvas.addPlot(row=1, col=1)
-        self.panel12 = self.icanvas.addPlot(row=1, col=2)
+        self.panel10 = CWImage(self.icanvas, row=1, col=0, cm_name='RdGy_r')
+        self.panel11 = CWImage(self.icanvas, row=1, col=1, cm_name='Oranges')
+        self.panel12 = CWImage(self.icanvas, row=1, col=2, cm_name='Greens')
         # row 2
-        self.panel20 = self.icanvas.addPlot(row=2, col=0)
-        self.panel21 = self.icanvas.addPlot(row=2, col=1)
-        self.panel22 = self.icanvas.addPlot(row=2, col=2)
-
-        # Place ImageItem() into plot windows
-        self.img00 = pg.ImageItem()
-        self.img01 = pg.ImageItem()
-        self.img02 = pg.ImageItem()
-        self.img10 = pg.ImageItem()
-        self.img11 = pg.ImageItem()
-        self.img12 = pg.ImageItem()
-        self.img20 = pg.ImageItem()
-        self.img21 = pg.ImageItem()
-        self.img22 = pg.ImageItem()
-
-        # Set cmaps
-        self.img00.setLookupTable(mplcm_to_pglut('gist_heat'))
-        self.img01.setLookupTable(mplcm_to_pglut('bwr'))
-        self.img02.setLookupTable(mplcm_to_pglut('gist_gray'))
-        self.img10.setLookupTable(mplcm_to_pglut('RdGy_r'))
-        self.img11.setLookupTable(mplcm_to_pglut('Oranges'))
-        self.img12.setLookupTable(mplcm_to_pglut('Greens'))
-        self.img20.setLookupTable(mplcm_to_pglut('Reds_r'))
-        self.img21.setLookupTable(mplcm_to_pglut('Blues_r'))
-        self.img22.setLookupTable(mplcm_to_pglut('copper'))
-
-        # Add panels to GUI
-        self.panel00.addItem(self.img00)
-        self.panel01.addItem(self.img01)
-        self.panel02.addItem(self.img02)
-        self.panel10.addItem(self.img10)
-        self.panel11.addItem(self.img11)
-        self.panel12.addItem(self.img12)
-        self.panel20.addItem(self.img20)
-        self.panel21.addItem(self.img21)
-        self.panel22.addItem(self.img22)
+        self.panel20 = CWImage(self.icanvas, row=2, col=0)
+        self.panel21 = CWImage(self.icanvas, row=2, col=1, cm_name='Blues_r')
+        self.panel22 = CWImage(self.icanvas, row=2, col=2, cm_name='copper')
 
         # Link panel views
-        self.linkviews(self.panel00, self.panel01)
-        self.linkviews(self.panel00, self.panel02)
-        self.linkviews(self.panel00, self.panel10)
-        self.linkviews(self.panel00, self.panel11)
-        self.linkviews(self.panel00, self.panel12)
-        self.linkviews(self.panel00, self.panel20)
-        self.linkviews(self.panel00, self.panel21)
-        self.linkviews(self.panel00, self.panel22)
+        self.linkviews(self.panel00.container, self.panel01.container)
+        self.linkviews(self.panel00.container, self.panel02.container)
+        self.linkviews(self.panel00.container, self.panel10.container)
+        self.linkviews(self.panel00.container, self.panel11.container)
+        self.linkviews(self.panel00.container, self.panel12.container)
+        self.linkviews(self.panel00.container, self.panel20.container)
+        self.linkviews(self.panel00.container, self.panel21.container)
+        self.linkviews(self.panel00.container, self.panel22.container)
 
 
         # Fill plot canvas
@@ -321,12 +298,13 @@ class Window(QMainWindow):
 
 
     def drawModel(self):
-        self.img00.setImage(self.m.temp[self.tt,:,:,self.itau])
-        self.img01.setImage(self.m.vlos[self.tt,:,:,self.itau])
-        self.img02.setImage(self.m.vturb[self.tt,:,:,self.itau])
-        self.img10.setImage(self.m.Bln[self.tt,:,:,self.itau])
-        self.img11.setImage(self.m.Bho[self.tt,:,:,self.itau])
-        self.img12.setImage(self.m.azi[self.tt,:,:,self.itau])
+#        self.img00.setImage(self.m.temp[self.tt,:,:,self.itau])
+        self.panel00.img.setImage(self.m.temp[self.tt,:,:,self.itau])
+        self.panel01.img.setImage(self.m.vlos[self.tt,:,:,self.itau])
+        self.panel02.img.setImage(self.m.vturb[self.tt,:,:,self.itau])
+        self.panel10.img.setImage(self.m.Bln[self.tt,:,:,self.itau])
+        self.panel11.img.setImage(self.m.Bho[self.tt,:,:,self.itau])
+        self.panel12.img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def plotModel(self):
         self.panelp00.plot(self.ltaus, self.m.temp[self.tt,0,0,:]/1.e3,
@@ -335,7 +313,7 @@ class Window(QMainWindow):
                 pen=self.invpen)
 
     def drawSynth(self):
-        self.img21.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
+        self.panel21.img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
 
     def plotSynth(self):
         self.panelp10.plot(self.wav, self.synprof[self.tt,0,0,:,0],
@@ -348,8 +326,8 @@ class Window(QMainWindow):
                 pen=self.invpen)
 
     def drawObs(self):
-        self.img20.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes])
-        self.img22.setImage(self.chi2[self.tt,:,:, self.istokes])
+        self.panel20.img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes])
+        self.panel22.img.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def plotObs(self):
         self.panelp10.plot(self.wav, self.obsprof[self.tt,0,0,:,0],
@@ -366,31 +344,31 @@ class Window(QMainWindow):
         view.setYLink(anchorview)
 
     def setlimits(self):
-        self.panel00.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel00.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel01.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel01.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel02.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel02.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel10.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel10.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel11.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel11.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel12.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel12.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel20.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel20.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel21.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel21.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
-        self.panel22.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
+        self.panel22.container.setLimits(xMin=0, xMax=self.nx, yMin=0, yMax=self.ny,
                 minXRange=self.nx/10, minYRange=self.ny/10, maxXRange=self.nx,
                 maxYRange=self.ny)
 
