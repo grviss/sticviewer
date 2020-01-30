@@ -260,6 +260,17 @@ class Window(QMainWindow):
         self.panelp20.setXLink(self.panelp10)
         self.panelp21.setXLink(self.panelp10)
 
+        # Add marker lines
+        self.wILine = pg.InfiniteLine(angle=90, movable=False)
+        self.wQLine = pg.InfiniteLine(angle=90, movable=False)
+        self.wULine = pg.InfiniteLine(angle=90, movable=False)
+        self.wVLine = pg.InfiniteLine(angle=90, movable=False)
+        self.panelp10.addItem(self.wILine)
+        self.panelp11.addItem(self.wQLine)
+        self.panelp20.addItem(self.wULine)
+        self.panelp21.addItem(self.wVLine)
+        self.updateWMarker()
+
         # ----- initialise menubar ----
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
@@ -413,6 +424,14 @@ class Window(QMainWindow):
         self.ww = self.wslider.sval
         self.drawSynth()
         self.drawObs()
+        self.updateWMarker()
+
+    def updateWMarker(self):
+        self.wILine.setPos(self.wav[self.ww])
+        self.wQLine.setPos(self.wav[self.ww])
+        self.wULine.setPos(self.wav[self.ww])
+        self.wVLine.setPos(self.wav[self.ww])
+
 
 
 
