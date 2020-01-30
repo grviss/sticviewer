@@ -152,8 +152,8 @@ class Window(QMainWindow):
         cpanel_layout.addItem(spacerItem)
 
         cpanel = QWidget()
-        cpanel.setGeometry(0,0,500,1000)
         cpanel.setLayout(cpanel_layout)
+        cpanel.setFixedWidth(500)
 
         # ---- initialise canvas ----
         pg.setConfigOption('background', 'w')
