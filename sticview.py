@@ -421,8 +421,8 @@ class Window(QMainWindow):
 
     def updateCrosshairs(self):
         for ii in range(len(self.cwimages)):
-            self.cwimages[ii].vLine.setPos(self.xx)
-            self.cwimages[ii].hLine.setPos(self.yy)
+            self.cwimages[ii].vLine.setPos(self.xx+0.5) # +0.5: place mid-pixel
+            self.cwimages[ii].hLine.setPos(self.yy+0.5)
 
 
 if __name__ == '__main__':
