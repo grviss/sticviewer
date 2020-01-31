@@ -221,40 +221,20 @@ class Window(QMainWindow):
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-        # row 0
-        self.panel00 = CWImage(self.icanvas, row=0, col=0, cm_name='gist_heat',
-                parent=self)
-        self.panel01 = CWImage(self.icanvas, row=0, col=1, cm_name='bwr',
-                parent=self)
-        self.panel02 = CWImage(self.icanvas, row=0, col=2, parent=self)
-        # row 1
-        self.panel10 = CWImage(self.icanvas, row=1, col=0, cm_name='RdGy_r',
-                parent=self)
-        self.panel11 = CWImage(self.icanvas, row=1, col=1, cm_name='Oranges',
-                parent=self)
-        self.panel12 = CWImage(self.icanvas, row=1, col=2, cm_name='Greens',
-                parent=self)
-        # row 2
-        self.panel20 = CWImage(self.icanvas, row=2, col=0, parent=self)
-        self.panel21 = CWImage(self.icanvas, row=2, col=1, cm_name='Blues_r',
-                parent=self)
-        self.panel22 = CWImage(self.icanvas, row=2, col=2, cm_name='copper',
-                parent=self)
 
-        # Link panel views
-        self.linkviews(self.panel00.box, self.panel01.box)
-        self.linkviews(self.panel00.box, self.panel02.box)
-        self.linkviews(self.panel00.box, self.panel10.box)
-        self.linkviews(self.panel00.box, self.panel11.box)
-        self.linkviews(self.panel00.box, self.panel12.box)
-        self.linkviews(self.panel00.box, self.panel20.box)
-        self.linkviews(self.panel00.box, self.panel21.box)
-        self.linkviews(self.panel00.box, self.panel22.box)
+        rows = [0, 0, 0, 1, 1, 1, 2, 2, 2]
+        cols = [0, 1, 2] * 3
+        cm_names = ['gist_heat', 'bwr', 'gist_gray', 'RdGy_r', 'Oranges',
+        'Greens', 'gist_gray', 'Blues_r', 'copper']
 
-        # Listen to cursor movement
-#        proxy = pg.SignalProxy(self.panel00.box.scene().sigMouseMoved, rateLimit=60,
-#                slot=self.panel00.mouseMoved)
+        self.cwimages = []
+        for ii in range(len(cols)):
+            cwimage = CWImage(self.icanvas, row=rows[ii], col=cols[ii],
+                    cm_name=cm_names[ii], parent=self)
+            self.cwimages.append(cwimage)
 
+        for ii in range(len(cols)-1):
+            self.linkviews(self.cwimages[0].box, self.cwimages[ii+1].box)
 
         # Fill plot canvas
         self.panelp00 = self.pcanvas.addPlot(row=0, col=0)
@@ -358,13 +338,12 @@ class Window(QMainWindow):
 
 
     def drawModel(self):
-#        self.img00.setImage(self.m.temp[self.tt,:,:,self.itau])
-        self.panel00.img.setImage(self.m.temp[self.tt,:,:,self.itau])
-        self.panel01.img.setImage(self.m.vlos[self.tt,:,:,self.itau])
-        self.panel02.img.setImage(self.m.vturb[self.tt,:,:,self.itau])
-        self.panel10.img.setImage(self.m.Bln[self.tt,:,:,self.itau])
-        self.panel11.img.setImage(self.m.Bho[self.tt,:,:,self.itau])
-        self.panel12.img.setImage(self.m.azi[self.tt,:,:,self.itau])
+        self.cwimages[0].img.setImage(self.m.temp[self.tt,:,:,self.itau])
+        self.cwimages[1].img.setImage(self.m.vlos[self.tt,:,:,self.itau])
+        self.cwimages[2].img.setImage(self.m.vturb[self.tt,:,:,self.itau])
+        self.cwimages[3].img.setImage(self.m.Bln[self.tt,:,:,self.itau])
+        self.cwimages[4].img.setImage(self.m.Bho[self.tt,:,:,self.itau])
+        self.cwimages[5].img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def plotModel(self):
         self.tinv.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
@@ -373,7 +352,7 @@ class Window(QMainWindow):
                 pen=self.invpen)
 
     def drawSynth(self):
-        self.panel21.img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
+        self.cwimages[7].img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
 
     def plotSynth(self):
         self.isyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,0],
@@ -386,8 +365,8 @@ class Window(QMainWindow):
                 pen=self.invpen)
 
     def drawObs(self):
-        self.panel20.img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes])
-        self.panel22.img.setImage(self.chi2[self.tt,:,:, self.istokes])
+        self.cwimages[6].img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes])
+        self.cwimages[8].img.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def plotObs(self):
         self.iobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,0],
