@@ -71,6 +71,24 @@ class CWImage(QWidget):
             self.parent().plotObs()
             self.parent().updateCrosshairs()
 
+class CWPlot(QWidget):
+    def __init__(self, canvas, row=0, col=0, plotwidth=200, xGrid=False,
+            yGrid=False, xtitle=None, ytitle=None, addMarker=False, parent=None):
+        super(CWPlot, self).__init__(parent=parent)
+        self.box = canvas.addPlot(row=row, col=col)
+        self.plot = self.box.plot()
+        self.box.setFixedWidth(plotwidth)
+        self.box.showGrid(x=xGrid, y=yGrid)
+        if xtitle is not None:
+            self.box.setLabel('bottom', xtitle)
+        if ytitle is not None:
+            self.box.setLabel('left', xtitle)
+
+        if addMarker is True:
+            self.line = pg.InfiniteLine(angle=90, movable=False)
+            self.box.addItem(self.line)
+
+
 
 class Slider(QWidget):
     def __init__(self, label, vmin, vmax, step, initval, intslider=False, parent=None):
@@ -236,53 +254,26 @@ class Window(QMainWindow):
             self.linkviews(self.cwimages[0].box, self.cwimages[ii+1].box)
 
         # Fill plot canvas
-        self.panelp00 = self.pcanvas.addPlot(row=0, col=0)
-        self.panelp01 = self.pcanvas.addPlot(row=0, col=1)
-        self.panelp10 = self.pcanvas.addPlot(row=1, col=0)
-        self.panelp11 = self.pcanvas.addPlot(row=1, col=1)
-        self.panelp20 = self.pcanvas.addPlot(row=2, col=0)
-        self.panelp21 = self.pcanvas.addPlot(row=2, col=1)
-        self.tinv = self.panelp00.plot()
-        self.vinv = self.panelp01.plot()
-        self.iobs = self.panelp10.plot()
-        self.isyn = self.panelp10.plot()
-        self.qobs = self.panelp11.plot()
-        self.qsyn = self.panelp11.plot()
-        self.uobs = self.panelp20.plot()
-        self.usyn = self.panelp20.plot()
-        self.vobs = self.panelp21.plot()
-        self.vsyn = self.panelp21.plot()
-
-        plotwidth = 275
-        self.panelp00.setFixedWidth(plotwidth)
-        self.panelp01.setFixedWidth(plotwidth)
-        self.panelp10.setFixedWidth(plotwidth)
-        self.panelp11.setFixedWidth(plotwidth)
-        self.panelp20.setFixedWidth(plotwidth)
-        self.panelp21.setFixedWidth(plotwidth)
-
-        self.panelp00.showGrid(x=True, y=True)
-        self.panelp01.showGrid(x=True, y=True)
-        self.panelp00.setLabel('left', 'T [kK]')
-        self.panelp00.setLabel('bottom', 'log('+u"τ"+')')
-        self.panelp01.setLabel('left', 'v_los [km/s]')
-        self.panelp01.setLabel('bottom', 'log('+u"τ"+')')
+        rows = [0, 0, 1, 1, 2, 2]
+        cols = [0, 1] * 3
+        xtitles_mod = ['log('+u"τ"+')'] * 2
+        xtitles_obs = ['wavelength'] * 4
+        xtitles = xtitles_mod + xtitles_obs
+        ytitles_mod = ['T [kK]', 'v_los [km/s]']
+        ytitles_obs = ['scaled intensity'] * 4
+        ytitles = ytitles_mod + ytitles_obs
+        self.cwplots = []
+        for ii in range(len(cols)):
+            cwplot = CWPlot(self.pcanvas, row=rows[ii], col=cols[ii],
+                    xGrid=True, yGrid=True, addMarker=(ii >= 2), plotwidth=275,
+                    xtitle=xtitles[ii], ytitle=ytitles[ii])
+            self.cwplots.append(cwplot)
 
         # Link plot panel views
-        self.panelp01.setXLink(self.panelp00)
-        self.panelp11.setXLink(self.panelp10)
-        self.panelp20.setXLink(self.panelp10)
-        self.panelp21.setXLink(self.panelp10)
+        self.cwplots[1].box.setXLink(self.cwplots[0].box)
+        for ii in range(3):
+            self.cwplots[ii+3].box.setXLink(self.cwplots[2].box)
 
-        # Add marker lines
-        self.wILine = pg.InfiniteLine(angle=90, movable=False)
-        self.wQLine = pg.InfiniteLine(angle=90, movable=False)
-        self.wULine = pg.InfiniteLine(angle=90, movable=False)
-        self.wVLine = pg.InfiniteLine(angle=90, movable=False)
-        self.panelp10.addItem(self.wILine)
-        self.panelp11.addItem(self.wQLine)
-        self.panelp20.addItem(self.wULine)
-        self.panelp21.addItem(self.wVLine)
         self.updateWMarker()
 
         # ----- initialise menubar ----
@@ -345,37 +336,28 @@ class Window(QMainWindow):
         self.cwimages[5].img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def plotModel(self):
-        self.tinv.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
+        self.cwplots[0].plot.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
                 pen=self.invpen)
-        self.vinv.setData(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
+        self.cwplots[1].plot.setData(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
                 pen=self.invpen)
 
     def drawSynth(self):
         self.cwimages[7].img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
 
     def plotSynth(self):
-        self.isyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,0],
-                pen=self.invpen)
-        self.qsyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,1],
-                pen=self.invpen)
-        self.usyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,2],
-                pen=self.invpen)
-        self.vsyn.setData(self.wav, self.synprof[self.tt,self.yy,self.xx,:,3],
-                pen=self.invpen)
+        for ii in range(4):
+            self.cwplots[ii+2].plot.setData(self.wav,
+                    self.synprof[self.tt,self.yy,self.xx,:,ii], pen=self.invpen)
 
     def drawObs(self):
         self.cwimages[6].img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes])
         self.cwimages[8].img.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def plotObs(self):
-        self.iobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,0],
-                symbol='o', symbolPen='k')
-        self.qobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,1],
-                symbol='o', symbolPen='k')
-        self.uobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,2],
-                symbol='o', symbolPen='k')
-        self.vobs.setData(self.wav, self.obsprof[self.tt,self.yy,self.xx,:,3],
-                symbol='o', symbolPen='k')
+        for ii in range(4):
+            self.cwplots[ii+2].plot.setData(self.wav,
+                    self.obsprof[self.tt,self.yy,self.xx,:,ii], symbol='o',
+                    symbolPen='k')
 
     def linkviews(self, anchorview, view):
         view.setXLink(anchorview)
@@ -414,10 +396,8 @@ class Window(QMainWindow):
         self.updateWMarker()
 
     def updateWMarker(self):
-        self.wILine.setPos(self.wav[self.ww])
-        self.wQLine.setPos(self.wav[self.ww])
-        self.wULine.setPos(self.wav[self.ww])
-        self.wVLine.setPos(self.wav[self.ww])
+        for ii in range(4):
+            self.cwplots[ii+2].line.setPos(self.wav[self.ww])
 
     def updateCrosshairs(self):
         for ii in range(len(self.cwimages)):
