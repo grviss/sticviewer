@@ -62,15 +62,14 @@ class CWImage(QWidget):
             # Ensure crosshairs within map
             self.xx = 0 if self.xx < 0 else self.nx-1 if self.xx >= self.nx else self.xx
             self.yy = 0 if self.yy < 0 else self.ny-1 if self.yy >= self.ny else self.yy
-            # Place crosshairs at right position
-            self.vLine.setPos(self.xx)
-            self.hLine.setPos(self.yy)
+            # Export cursor position 
             self.parent().xx = self.xx
             self.parent().yy = self.yy
-            # Update plots
+            # Update plots and crosshairs
             self.parent().plotModel()
             self.parent().plotSynth()
             self.parent().plotObs()
+            self.parent().updateCrosshairs()
 
 
 class Slider(QWidget):
@@ -420,6 +419,10 @@ class Window(QMainWindow):
         self.wULine.setPos(self.wav[self.ww])
         self.wVLine.setPos(self.wav[self.ww])
 
+    def updateCrosshairs(self):
+        for ii in range(len(self.cwimages)):
+            self.cwimages[ii].vLine.setPos(self.xx)
+            self.cwimages[ii].hLine.setPos(self.yy)
 
 
 if __name__ == '__main__':
