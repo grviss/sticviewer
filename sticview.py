@@ -25,7 +25,7 @@ def mplcm_to_pglut(cm_name):
     return lut
 
 class CWImage(QWidget):
-    def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', nx=None,
+    def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', ch_color='w', nx=None,
             ny=None, parent=None):
         super(CWImage, self).__init__(parent=parent)
         self.box = canvas.addPlot(row=row, col=col)
@@ -39,8 +39,8 @@ class CWImage(QWidget):
                     maxXRange=parent.nx, maxYRange=parent.ny)
 
         # Handle crosshairs
-        self.vLine = pg.InfiniteLine(pen=pg.mkPen('w'), angle=90, movable=False)
-        self.hLine = pg.InfiniteLine(pen=pg.mkPen('w'), angle=0, movable=False)
+        self.vLine = pg.InfiniteLine(pen=pg.mkPen(ch_color), angle=90, movable=False)
+        self.hLine = pg.InfiniteLine(pen=pg.mkPen(ch_color), angle=0, movable=False)
         self.box.addItem(self.vLine, ignoreBounds=True)
         self.box.addItem(self.hLine, ignoreBounds=True)
 
@@ -243,11 +243,12 @@ class Window(QMainWindow):
         cols = [0, 1, 2] * 3
         cm_names = ['gist_heat', 'bwr', 'gist_gray', 'RdGy_r', 'Oranges',
         'Greens', 'gist_gray', 'Blues_r', 'copper']
+        ch_colors = ['w', 'k', 'w', 'k', 'k', 'k', 'w', 'k', 'w']
 
         self.cwimages = []
         for ii in range(len(cols)):
             cwimage = CWImage(self.icanvas, row=rows[ii], col=cols[ii],
-                    cm_name=cm_names[ii], parent=self)
+                    cm_name=cm_names[ii], ch_color=ch_colors[ii], parent=self)
             self.cwimages.append(cwimage)
 
         for ii in range(len(cols)-1):
