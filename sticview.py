@@ -76,7 +76,8 @@ class CWPlot(QWidget):
             yGrid=False, xtitle=None, ytitle=None, addMarker=False, parent=None):
         super(CWPlot, self).__init__(parent=parent)
         self.box = canvas.addPlot(row=row, col=col)
-        self.plot = self.box.plot()
+        self.obsplot = self.box.plot()
+        self.invplot = self.box.plot()
         self.box.setFixedWidth(plotwidth)
         self.box.showGrid(x=xGrid, y=yGrid)
         if xtitle is not None:
@@ -337,9 +338,9 @@ class Window(QMainWindow):
         self.cwimages[5].img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def plotModel(self):
-        self.cwplots[0].plot.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
+        self.cwplots[0].invplot.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
                 pen=self.invpen)
-        self.cwplots[1].plot.setData(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
+        self.cwplots[1].invplot.setData(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
                 pen=self.invpen)
 
     def drawSynth(self):
@@ -347,7 +348,7 @@ class Window(QMainWindow):
 
     def plotSynth(self):
         for ii in range(4):
-            self.cwplots[ii+2].plot.setData(self.wav,
+            self.cwplots[ii+2].invplot.setData(self.wav,
                     self.synprof[self.tt,self.yy,self.xx,:,ii], pen=self.invpen)
 
     def drawObs(self):
@@ -356,7 +357,7 @@ class Window(QMainWindow):
 
     def plotObs(self):
         for ii in range(4):
-            self.cwplots[ii+2].plot.setData(self.wav,
+            self.cwplots[ii+2].obsplot.setData(self.wav,
                     self.obsprof[self.tt,self.yy,self.xx,:,ii], symbol='o',
                     symbolPen='k')
 
