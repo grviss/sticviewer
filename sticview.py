@@ -202,7 +202,7 @@ class Window(QMainWindow):
 
         cpanel = QWidget()
         cpanel.setLayout(cpanel_layout)
-        cpanel.setFixedWidth(500)
+        cpanel.setFixedWidth(250)
 
         # ---- initialise canvas ----
         pg.setConfigOption('background', 'w')
