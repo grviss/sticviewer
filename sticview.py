@@ -10,7 +10,8 @@ import matplotlib.cm as cm
 
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, qApp,
 QVBoxLayout, QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
-QSlider, QLabel, QGridLayout, QSpacerItem, QSizePolicy)
+QSlider, QLabel, QGridLayout, QSpacerItem, QSizePolicy, QRadioButton,
+QButtonGroup, QGroupBox)
 from PyQt5 import QtCore
 import pyqtgraph as pg
 
@@ -89,6 +90,27 @@ class CWPlot(QWidget):
             self.line = pg.InfiniteLine(pen=pg.mkPen('b'), angle=90, movable=False)
             self.box.addItem(self.line)
 
+
+class CWButtonGroup(QGroupBox):
+    def __init__(self, labels, horizontal=True, parent=None):
+        super(CWButtonGroup, self).__init__(parent=parent)
+        self.group = QButtonGroup()
+        if horizontal is True:
+            layout = QHBoxLayout()
+        else:
+            layout = QVBoxLayout()
+
+        for ii in range(len(labels)):
+            button = QRadioButton(labels[ii])
+            layout.addWidget(button)
+            self.group.addButton(button, ii)
+            button.clicked.connect(self.buttonSelect)
+
+        self.setLayout(layout)
+
+    def buttonSelect(self):
+        self.select_idx = self.group.checkedId()
+        self.select_txt = self.group.checkedButton().text()
 
 
 class Slider(QWidget):
@@ -212,9 +234,12 @@ class Window(QMainWindow):
                 intslider=True)
         self.wslider.slider.valueChanged.connect(self.updateWave)
 
+        self.stokes_buttons = CWButtonGroup(['I', 'Q', 'U', 'V'])
+
         cpanel_layout.addWidget(self.zslider)
         cpanel_layout.addWidget(self.tslider)
         cpanel_layout.addWidget(self.wslider)
+        cpanel_layout.addWidget(self.stokes_buttons)
         spacerItem = QSpacerItem(50, 50, QSizePolicy.Minimum,
                 QSizePolicy.Expanding)
         cpanel_layout.addItem(spacerItem)
@@ -405,6 +430,11 @@ class Window(QMainWindow):
         for ii in range(len(self.cwimages)):
             self.cwimages[ii].vLine.setPos(self.xx+0.5) # +0.5: place mid-pixel
             self.cwimages[ii].hLine.setPos(self.yy+0.5)
+
+    def updateStokes(self):
+        self.istokes = self.stokes_buttons.select_idx
+        self.drawObs()
+        self.drawSynth()
 
 
 if __name__ == '__main__':
