@@ -83,10 +83,10 @@ class CWPlot(QWidget):
         if xtitle is not None:
             self.box.setLabel('bottom', xtitle)
         if ytitle is not None:
-            self.box.setLabel('left', xtitle)
+            self.box.setLabel('left', ytitle)
 
         if addMarker is True:
-            self.line = pg.InfiniteLine(angle=90, movable=False)
+            self.line = pg.InfiniteLine(pen=pg.mkPen('b'), angle=90, movable=False)
             self.box.addItem(self.line)
 
 
