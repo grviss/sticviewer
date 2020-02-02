@@ -91,28 +91,6 @@ class CWPlot(QWidget):
             self.box.addItem(self.line)
 
 
-class CWButtonGroup(QGroupBox):
-    def __init__(self, labels, horizontal=True, parent=None):
-        super(CWButtonGroup, self).__init__(parent=parent)
-        self.group = QButtonGroup()
-        if horizontal is True:
-            layout = QHBoxLayout()
-        else:
-            layout = QVBoxLayout()
-
-        for ii in range(len(labels)):
-            button = QRadioButton(labels[ii])
-            layout.addWidget(button)
-            self.group.addButton(button, ii)
-            button.clicked.connect(self.buttonSelect)
-
-        self.setLayout(layout)
-
-    def buttonSelect(self):
-        self.select_idx = self.group.checkedId()
-        self.select_txt = self.group.checkedButton().text()
-
-
 class Slider(QWidget):
     def __init__(self, label, vmin, vmax, step, initval, intslider=False, parent=None):
         super(Slider, self).__init__(parent=parent)
@@ -234,12 +212,24 @@ class Window(QMainWindow):
                 intslider=True)
         self.wslider.slider.valueChanged.connect(self.updateWave)
 
-        self.stokes_buttons = CWButtonGroup(['I', 'Q', 'U', 'V'])
+        # Stokes button group
+        labels_stokes = ['I', 'Q', 'U', 'V']
+        self.bgroup = QWidget()
+        self.bgroup_stokes = QButtonGroup()
+        layout = QHBoxLayout()
+        for ii in range(len(labels_stokes)):
+            button = QRadioButton(labels_stokes[ii])
+            if ii == 0: button.setChecked(True)
+            self.bgroup_stokes.addButton(button, ii)
+            layout.addWidget(button)
+            button.clicked.connect(self.updateStokes)
+        self.bgroup.setLayout(layout)
 
+        # Add widgets to control panel
         cpanel_layout.addWidget(self.zslider)
         cpanel_layout.addWidget(self.tslider)
         cpanel_layout.addWidget(self.wslider)
-        cpanel_layout.addWidget(self.stokes_buttons)
+        cpanel_layout.addWidget(self.bgroup)
         spacerItem = QSpacerItem(50, 50, QSizePolicy.Minimum,
                 QSizePolicy.Expanding)
         cpanel_layout.addItem(spacerItem)
@@ -432,7 +422,7 @@ class Window(QMainWindow):
             self.cwimages[ii].hLine.setPos(self.yy+0.5)
 
     def updateStokes(self):
-        self.istokes = self.stokes_buttons.select_idx
+        self.istokes = self.bgroup_stokes.checkedId()
         self.drawObs()
         self.drawSynth()
 
