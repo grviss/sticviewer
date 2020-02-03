@@ -165,9 +165,9 @@ class Window(QMainWindow):
         # ---- get input ----
         self.filetypes = {\
              'atm': {'name': 'atmosout', 'fullname': 'atmosphere model',
-             'filter': 'atmosout*.nc'},
+             'filter': '*.nc'},
              'syn': {'name': 'synthetic', 'fullname': 'synthetic profile',
-             'filter': 'synthetic*.nc'},
+             'filter': '*.nc'},
              'obs': {'name': 'observed', 'fullname': 'observed profile',
              'filter': '*.nc'}}
         self.fname_atmos = self.getFileName(typedict=self.filetypes['atm'])
@@ -382,10 +382,12 @@ class Window(QMainWindow):
 
     def getFileName(self, typedict=None):
         inam = 'getFileName'
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
         filename, _ = QFileDialog.getOpenFileName(self, 
             "Please select the input {0} file".format(typedict['name']), os.getcwd(), 
             "STiC {0} file ({1})".format(typedict['fullname'],
-                typedict['filter']))
+                typedict['filter']), options=options)
         if filename:
             print("{0}: opening {1} file {2}".format(inam, typedict['fullname'],
                 filename))
