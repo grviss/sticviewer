@@ -178,6 +178,7 @@ class Window(QMainWindow):
         self.initModel()
         self.initSynth()
         self.initObs()
+        self.vminmaxImage()
 
         # ---- initialise UI ----
         self.initUI()
@@ -343,6 +344,15 @@ class Window(QMainWindow):
         self.chi2[tt,yy,xx,ww,ss] = chi2max
         self.chi2 = np.sum(self.chi2, axis=3)
 
+    def vminmaxImage(self):
+        min_syn = np.min(self.s.dat[:,:,:,self.wsel,:], axis=(0,1,2,3))
+        max_syn = np.max(self.s.dat[:,:,:,self.wsel,:], axis=(0,1,2,3))
+        min_obs = np.min(self.o.dat[:,:,:,self.wsel,:], axis=(0,1,2,3))
+        max_obs = np.max(self.o.dat[:,:,:,self.wsel,:], axis=(0,1,2,3))
+        self.vminmax = []
+        for ii in range(4):
+            self.vminmax.append((np.minimum(min_syn[ii], min_obs[ii]),
+                np.maximum(max_syn[ii], max_obs[ii])))
 
     def drawModel(self):
         self.cwimages[0].img.setImage(self.m.temp[self.tt,:,:,self.itau])
@@ -359,7 +369,8 @@ class Window(QMainWindow):
                 pen=self.invpen)
 
     def drawSynth(self):
-        self.cwimages[7].img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes])
+        self.cwimages[7].img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes],
+                levels=self.vminmax[self.istokes])
 
     def plotSynth(self):
         for ii in range(4):
@@ -367,7 +378,8 @@ class Window(QMainWindow):
                     self.synprof[self.tt,self.yy,self.xx,:,ii], pen=self.invpen)
 
     def drawObs(self):
-        self.cwimages[6].img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes])
+        self.cwimages[6].img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes],
+                levels=self.vminmax[self.istokes])
         self.cwimages[8].img.setImage(self.chi2[self.tt,:,:, self.istokes])
 
     def plotObs(self):
