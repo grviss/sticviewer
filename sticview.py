@@ -205,7 +205,7 @@ class Window(QMainWindow):
                 self.ltaus[self.itau])
         self.zslider.slider.valueChanged.connect(self.updateDepth)
         self.tslider = Slider('Time [index]', 0, self.nt-1, 1, 0, intslider=True)
-        if self.nt:
+        if self.nt == 1:
             self.tslider.setDisabled(True)
         self.tslider.slider.valueChanged.connect(self.updateTime)
 
