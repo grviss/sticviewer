@@ -176,9 +176,10 @@ class Window(QMainWindow):
         self.fname_obs = self.getFileName(typedict=self.filetypes['obs'])
 
         # ---- initialise input ----
+        self.initObs()
         self.initModel()
         self.initSynth()
-        self.initObs()
+        self.getChi2()
         self.vminmaxImage()
 
         # ---- initialise UI ----
@@ -337,16 +338,18 @@ class Window(QMainWindow):
 
     def initSynth(self):
         self.s = sp.profile(self.fname_synth)
-        self.wsel = np.where(self.s.dat[0,0,0,:,0] > 0)[0]
         self.synprof = self.s.dat[:,:,:,self.wsel,:]
-        self.wav = self.s.wav
         self.nw = self.wsel.size
         self.ww = 0
         self.istokes = 0
 
     def initObs(self):
         self.o = sp.profile(self.fname_obs)
+        self.wsel = np.where(self.o.dat[0,0,0,:,0] > 0)[0]
+        self.wav = self.o.wav[self.wsel]
         self.obsprof = self.o.dat[:,:,:,self.wsel,:]
+
+    def getChi2(self):
         minval = np.minimum(self.obsprof.min(), self.synprof.min())
         obsprof = self.obsprof + np.abs(minval)*1.1
         synprof = self.synprof + np.abs(minval)*1.1 # avoid division by 0
@@ -469,11 +472,11 @@ class Window(QMainWindow):
                         self.m.Bln[self.tt, self.yy, self.xx, self.itau],
                         self.m.Bho[self.tt, self.yy, self.xx, self.itau],
                         self.m.azi[self.tt, self.yy, self.xx, self.itau])
-        synth = 'Profile: (Iobs, Isyn, Chi2)=({0:>5.2f},{1:>5.2f},{2:>5.2f})'.\
+        profs = 'Profile: Iobs={0:>6.3f}, Isyn={1:>6.3f}, Chi2={2:>5.2f}'.\
                 format(self.o.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
                     self.s.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
                     self.chi2[self.tt, self.yy, self.xx])
-        self.status.showMessage(coords+' | '+model+' | '+synth)
+        self.status.showMessage(coords+' | '+model+' | '+profs)
 
 
 if __name__ == '__main__':
