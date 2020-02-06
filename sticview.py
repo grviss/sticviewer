@@ -79,6 +79,7 @@ class CWPlot(QWidget):
         self.box = canvas.addPlot(row=row, col=col)
         self.obsplot = self.box.plot()
         self.invplot = self.box.plot()
+        self.invplot2 = self.box.plot()
         self.box.setFixedWidth(plotwidth)
         self.box.showGrid(x=xGrid, y=yGrid)
         if xtitle is not None:
@@ -246,6 +247,7 @@ class Window(QMainWindow):
         pg.setConfigOption('background', 'w')
         pg.setConfigOption('foreground', 'k')
         self.invpen = pg.mkPen('r', width=3)
+        self.invpen2 = pg.mkPen('b', width=3)
 
         self.icanvas = pg.GraphicsLayoutWidget()
         self.pcanvas = pg.GraphicsLayoutWidget()
@@ -279,7 +281,7 @@ class Window(QMainWindow):
         xtitles_mod = ['log('+u"τ"+')'] * 2
         xtitles_obs = ['wavelength'] * 4
         xtitles = xtitles_mod + xtitles_obs
-        ytitles_mod = ['T [kK]', 'v_los [km/s]']
+        ytitles_mod = ['T [kK]', 'v [km/s]']
         ytitles_obs = ['scaled intensity'] * 4
         ytitles = ytitles_mod + ytitles_obs
         self.cwplots = []
@@ -372,6 +374,8 @@ class Window(QMainWindow):
                 pen=self.invpen)
         self.cwplots[1].invplot.setData(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
                 pen=self.invpen)
+        self.cwplots[1].invplot2.setData(self.ltaus, self.m.vturb[self.tt,self.yy,self.xx,:],
+                pen=self.invpen2)
 
     def drawSynth(self):
         self.cwimages[7].img.setImage(self.synprof[self.tt,:,:,self.ww,self.istokes],
