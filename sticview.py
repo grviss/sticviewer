@@ -287,7 +287,7 @@ class Window(QMainWindow):
         self.cwplots = []
         for ii in range(len(cols)):
             cwplot = CWPlot(self.pcanvas, row=rows[ii], col=cols[ii],
-                    xGrid=True, yGrid=True, addMarker=(ii >= 2), plotwidth=275,
+                    xGrid=True, yGrid=True, addMarker=True, plotwidth=275,
                     xtitle=xtitles[ii], ytitle=ytitles[ii])
             self.cwplots.append(cwplot)
 
@@ -297,6 +297,7 @@ class Window(QMainWindow):
             self.cwplots[ii+3].box.setXLink(self.cwplots[2].box)
 
         self.updateWMarker()
+        self.updateTauMarker()
 
         # ----- initialise menubar ----
         menubar = self.menuBar()
@@ -421,6 +422,7 @@ class Window(QMainWindow):
     def updateDepth(self):
         self.itau = np.argmin(np.abs(self.ltaus-self.zslider.sval))
         self.drawModel()
+        self.updateTauMarker()
         self.updateStatus()
 
     def updateTime(self):
@@ -441,6 +443,10 @@ class Window(QMainWindow):
     def updateWMarker(self):
         for ii in range(4):
             self.cwplots[ii+2].line.setPos(self.wav[self.ww])
+
+    def updateTauMarker(self):
+        for ii in range(2):
+            self.cwplots[ii].line.setPos(self.ltaus[self.itau])
 
     def updateCrosshairs(self):
         self.updateStatus()
