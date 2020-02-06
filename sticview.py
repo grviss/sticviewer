@@ -152,7 +152,7 @@ class Slider(QWidget):
 
     def setLabelValue(self, intslider=False):
         if intslider is False:
-            self.labelvalue.setText("{0:.4g}".format(self.sval))
+            self.labelvalue.setText("{0:.2f}".format(self.sval))
         else:
             self.labelvalue.setText("{0}".format(self.sval))
 
