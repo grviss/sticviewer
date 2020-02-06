@@ -7,6 +7,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from matplotlib.colors import LinearSegmentedColormap
 
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, qApp,
 QVBoxLayout, QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
@@ -23,6 +24,52 @@ def mplcm_to_pglut(cmap):
     cmap._init()
     lut = (cmap._lut * 255).view(np.ndarray)
     return lut
+
+def shift_cmap(cmap, data, name='shifted'):
+    """
+    Function to offset the "center" of a colormap. Useful for
+    data with a negative min and positive max and you want the
+    middle of the colormap's dynamic range to be at zero
+
+    Author:
+        Paul H.
+        (https://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib/7741317#7741317)
+    """
+
+    cdict = {
+        'red': [],
+        'green': [],
+        'blue': [],
+        'alpha': []
+    }
+
+    start = 0.0
+    stop = 1.0
+
+    midpoint = 1. - data.max()/(data.max() + np.abs(data.min()))
+    if midpoint >= 1: midpoint = 1.
+
+    # regular index to compute the colors
+    reg_index = np.linspace(start, stop, 257)
+
+    # shifted index to match the data
+    shift_index = np.hstack([
+        np.linspace(0.0, midpoint, 128, endpoint=False),
+        np.linspace(midpoint, 1.0, 129, endpoint=True)
+    ])
+
+    for ri, si in zip(reg_index, shift_index):
+        r, g, b, a = cmap(ri)
+
+        cdict['red'].append((si, r, r))
+        cdict['green'].append((si, g, g))
+        cdict['blue'].append((si, b, b))
+        cdict['alpha'].append((si, a, a))
+
+    newcmap = LinearSegmentedColormap(name, cdict)
+
+    return newcmap
+
 
 class CWImage(QWidget):
     def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', ch_color='w', nx=None,
@@ -373,11 +420,15 @@ class Window(QMainWindow):
 
     def drawModel(self):
         self.cwimages[0].img.setImage(self.m.temp[self.tt,:,:,self.itau])
+        vlos = self.m.vlos[self.tt,:,:,self.itau]
+        lut_vlos = mplcm_to_pglut(shift_cmap(cm.get_cmap('bwr'), vlos))
         self.cwimages[1].img.setImage(self.m.vlos[self.tt,:,:,self.itau],
-                levels=self.minmax_vlos[:,self.itau])
+                levels=self.minmax_vlos[:,self.itau], lut=lut_vlos)
         self.cwimages[2].img.setImage(self.m.vturb[self.tt,:,:,self.itau])
+        Bln = self.m.Bln[self.tt,:,:,self.itau]
+        lut_Bln = mplcm_to_pglut(shift_cmap(cm.get_cmap('RdGy_r'), Bln))
         self.cwimages[3].img.setImage(self.m.Bln[self.tt,:,:,self.itau],
-                levels=self.minmax_Bln[:,self.itau])
+                levels=self.minmax_Bln[:,self.itau], lut=lut_Bln)
         self.cwimages[4].img.setImage(self.m.Bho[self.tt,:,:,self.itau])
         self.cwimages[5].img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
