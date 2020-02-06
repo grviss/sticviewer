@@ -247,7 +247,6 @@ class Window(QMainWindow):
         self.icanvas = pg.GraphicsLayoutWidget()
         self.pcanvas = pg.GraphicsLayoutWidget()
         self.pcanvas.setFixedWidth(600)
-#        self.setCentralWidget(self.canvas)
         layout = QHBoxLayout()
         layout.addWidget(cpanel)
         layout.addWidget(self.icanvas)
@@ -383,7 +382,7 @@ class Window(QMainWindow):
     def drawObs(self):
         self.cwimages[6].img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes],
                 levels=self.vminmax[self.istokes])
-        self.cwimages[8].img.setImage(self.chi2[self.tt,:,:]) #, self.istokes])
+        self.cwimages[8].img.setImage(self.chi2[self.tt,:,:])
 
     def plotObs(self):
         for ii in range(4):
@@ -461,7 +460,7 @@ class Window(QMainWindow):
         synth = 'Profile: (Iobs, Isyn, Chi2)=({0:>5.2f},{1:>5.2f},{2:>5.2f})'.\
                 format(self.o.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
                     self.s.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
-                    self.chi2[self.tt, self.yy, self.xx]) #, self.istokes])
+                    self.chi2[self.tt, self.yy, self.xx])
         self.status.showMessage(coords+' | '+model+' | '+synth)
 
 
