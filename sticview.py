@@ -19,8 +19,7 @@ import sparsetools as sp
 
 from ipdb import set_trace as stop
 
-def mplcm_to_pglut(cm_name):
-    cmap = cm.get_cmap(cm_name)
+def mplcm_to_pglut(cmap):
     cmap._init()
     lut = (cmap._lut * 255).view(np.ndarray)
     return lut
@@ -270,7 +269,7 @@ class Window(QMainWindow):
         self.cwimages = []
         for ii in range(len(cols)):
             cwimage = CWImage(self.icanvas, row=rows[ii], col=cols[ii],
-                    cm_name=cm_names[ii], ch_color=ch_colors[ii], parent=self)
+                    cm_name=cm.get_cmap(cm_names[ii]), ch_color=ch_colors[ii], parent=self)
             self.cwimages.append(cwimage)
 
         for ii in range(len(cols)-1):
