@@ -455,8 +455,7 @@ class Window(QMainWindow):
         self.updateStatus()
 
     def updateStatus(self):
-        coords = 'Position: (x,y,w,s,t)=({0:>3},{1:>3},{2:>3},{3:>3},{4:>3})'.\
-                format(self.xx, self.yy, self.ww, self.istokes, self.tt)
+        coords = 'Position: (x,y)=({0:>3},{1:>3})'.format(self.xx, self.yy)
         model = 'Model: T[kK]={0:>6.2f}, vlos[km/s]={1:>6.2f}, vturb[km/s]={2:>6.2f}, Bln[kG]={3:>6.2f}, Bho[kG]={4:>6.2f}, azi[deg]={5:>5.1f})'.\
                 format(self.m.temp[self.tt, self.yy, self.xx, self.itau],
                         self.m.vlos[self.tt, self.yy, self.xx, self.itau],
