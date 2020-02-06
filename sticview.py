@@ -333,6 +333,13 @@ class Window(QMainWindow):
         self.m.temp /= 1.e3 # in kK
         self.m.Bln /= 1.e3 # in kG
         self.m.Bho /= 1.e3 # in kG
+
+        self.minmax_vlos = np.zeros((2, self.m.ndep), dtype='float64')
+        self.minmax_vlos[0,:] = np.min(self.m.vlos, axis=(0,1,2))
+        self.minmax_vlos[1,:] = np.max(self.m.vlos, axis=(0,1,2))
+        self.minmax_Bln = np.zeros((2, self.m.ndep), dtype='float64')
+        self.minmax_Bln[0,:] = np.min(self.m.Bln, axis=(0,1,2))
+        self.minmax_Bln[1,:] = np.max(self.m.Bln, axis=(0,1,2))
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
 
@@ -367,9 +374,11 @@ class Window(QMainWindow):
 
     def drawModel(self):
         self.cwimages[0].img.setImage(self.m.temp[self.tt,:,:,self.itau])
-        self.cwimages[1].img.setImage(self.m.vlos[self.tt,:,:,self.itau])
+        self.cwimages[1].img.setImage(self.m.vlos[self.tt,:,:,self.itau],
+                levels=self.minmax_vlos[:,self.itau])
         self.cwimages[2].img.setImage(self.m.vturb[self.tt,:,:,self.itau])
-        self.cwimages[3].img.setImage(self.m.Bln[self.tt,:,:,self.itau])
+        self.cwimages[3].img.setImage(self.m.Bln[self.tt,:,:,self.itau],
+                levels=self.minmax_Bln[:,self.itau])
         self.cwimages[4].img.setImage(self.m.Bho[self.tt,:,:,self.itau])
         self.cwimages[5].img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
