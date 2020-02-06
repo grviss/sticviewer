@@ -218,6 +218,9 @@ class Window(QMainWindow):
         self.bgroup = QWidget()
         self.bgroup_stokes = QButtonGroup()
         layout = QHBoxLayout()
+        label_stokes = QLabel()
+        layout.addWidget(label_stokes)
+        label_stokes.setText('Stokes')
         for ii in range(len(labels_stokes)):
             button = QRadioButton(labels_stokes[ii])
             if ii == 0: button.setChecked(True)
@@ -237,7 +240,7 @@ class Window(QMainWindow):
 
         cpanel = QWidget()
         cpanel.setLayout(cpanel_layout)
-        cpanel.setFixedWidth(250)
+        cpanel.setFixedWidth(275)
 
         # ---- initialise canvas ----
         pg.setConfigOption('background', 'w')
