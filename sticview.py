@@ -322,8 +322,11 @@ class Window(QMainWindow):
         self.ltaus = self.m.ltau[0,0,0,:]
 
         self.m.azi *= 180./np.pi
-        self.m.vturb *= 1.e-5
+        self.m.vturb *= 1.e-5  # in km/s
         self.m.vlos *= 1.e-5
+        self.m.temp /= 1.e3 # in kK
+        self.m.Bln /= 1.e3 # in kG
+        self.m.Bho /= 1.e3 # in kG
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
 
@@ -363,7 +366,7 @@ class Window(QMainWindow):
         self.cwimages[5].img.setImage(self.m.azi[self.tt,:,:,self.itau])
 
     def plotModel(self):
-        self.cwplots[0].invplot.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:]/1.e3,
+        self.cwplots[0].invplot.setData(self.ltaus, self.m.temp[self.tt,self.yy,self.xx,:],
                 pen=self.invpen)
         self.cwplots[1].invplot.setData(self.ltaus, self.m.vlos[self.tt,self.yy,self.xx,:],
                 pen=self.invpen)
@@ -449,11 +452,11 @@ class Window(QMainWindow):
         coords = 'Position: (x,y,w,s,t)=({0:>3},{1:>3},{2:>3},{3:>3},{4:>3})'.\
                 format(self.xx, self.yy, self.ww, self.istokes, self.tt)
         model = 'Model: T[kK]={0:>6.2f}, vlos[km/s]={1:>6.2f}, vturb[km/s]={2:>6.2f}, Bln[kG]={3:>6.2f}, Bho[kG]={4:>6.2f}, azi[deg]={5:>5.1f})'.\
-                format(self.m.temp[self.tt, self.yy, self.xx, self.itau]/1.e3,
+                format(self.m.temp[self.tt, self.yy, self.xx, self.itau],
                         self.m.vlos[self.tt, self.yy, self.xx, self.itau],
                         self.m.vturb[self.tt, self.yy, self.xx, self.itau],
-                        self.m.Bln[self.tt, self.yy, self.xx, self.itau]/1.e3,
-                        self.m.Bho[self.tt, self.yy, self.xx, self.itau]/1.e3,
+                        self.m.Bln[self.tt, self.yy, self.xx, self.itau],
+                        self.m.Bho[self.tt, self.yy, self.xx, self.itau],
                         self.m.azi[self.tt, self.yy, self.xx, self.itau])
         synth = 'Profile: (Iobs, Isyn, Chi2)=({0:>5.2f},{1:>5.2f},{2:>5.2f})'.\
                 format(self.o.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
