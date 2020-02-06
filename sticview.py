@@ -339,13 +339,10 @@ class Window(QMainWindow):
     def initObs(self):
         self.o = sp.profile(self.fname_obs)
         self.obsprof = self.o.dat[:,:,:,self.wsel,:]
-        self.chi2 = (self.obsprof - self.synprof)**2
-        tt, yy, xx, ww, ss = np.where(self.synprof != 0)
-        self.chi2[tt,yy,xx,ww,ss] /= self.synprof[tt,yy,xx,ww,ss]
-        chi2max = self.chi2.max()
-        tt, yy, xx, ww, ss = np.where(self.synprof == 0)
-        self.chi2[tt,yy,xx,ww,ss] = chi2max
-        self.chi2 = np.sum(self.chi2, axis=3)
+        minval = np.minimum(self.obsprof.min(), self.synprof.min())
+        obsprof = self.obsprof + np.abs(minval)*1.1
+        synprof = self.synprof + np.abs(minval)*1.1 # avoid division by 0
+        self.chi2 = np.sum((obsprof - synprof)**2 / synprof, axis=(3,4))
 
     def vminmaxImage(self):
         min_syn = np.min(self.s.dat[:,:,:,self.wsel,:], axis=(0,1,2,3))
@@ -383,7 +380,7 @@ class Window(QMainWindow):
     def drawObs(self):
         self.cwimages[6].img.setImage(self.obsprof[self.tt,:,:,self.ww,self.istokes],
                 levels=self.vminmax[self.istokes])
-        self.cwimages[8].img.setImage(self.chi2[self.tt,:,:, self.istokes])
+        self.cwimages[8].img.setImage(self.chi2[self.tt,:,:]) #, self.istokes])
 
     def plotObs(self):
         for ii in range(4):
@@ -461,7 +458,7 @@ class Window(QMainWindow):
         synth = 'Profile: (Iobs, Isyn, Chi2)=({0:>5.2f},{1:>5.2f},{2:>5.2f})'.\
                 format(self.o.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
                     self.s.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
-                    self.chi2[self.tt, self.yy, self.xx, self.istokes])
+                    self.chi2[self.tt, self.yy, self.xx]) #, self.istokes])
         self.status.showMessage(coords+' | '+model+' | '+synth)
 
 
