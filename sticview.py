@@ -350,11 +350,21 @@ class Window(QMainWindow):
         menubar = self.menuBar()
         menubar.setNativeMenuBar(False)
         filemenu = menubar.addMenu('File')
+        viewmenu = menubar.addMenu('View')
 
         exitButton = QAction('Quit', self)
         exitButton.setShortcut('Ctrl+Q')
         exitButton.triggered.connect(qApp.quit)
         filemenu.addAction(exitButton)
+
+        wincButton = QAction('Wavelength +', self)
+        wincButton.setShortcut('Ctrl+S')
+        wincButton.triggered.connect(self.incWave)
+        viewmenu.addAction(wincButton)
+        wdecButton = QAction('Wavelength -', self)
+        wdecButton.setShortcut('Ctrl+A')
+        wdecButton.triggered.connect(self.decWave)
+        viewmenu.addAction(wdecButton)
 
         # ---- initialise statusbar ----
         self.status = self.statusBar()
@@ -407,6 +417,7 @@ class Window(QMainWindow):
         obsprof = self.obsprof + np.abs(minval)*1.1
         synprof = self.synprof + np.abs(minval)*1.1 # avoid division by 0
         self.chi2_stokes = np.sum((obsprof - synprof)**2 / synprof, axis=3)
+        self.chi2_stokes = np.sum((synprof - obsprof)**2 / obsprof, axis=3)
         self.chi2 = np.sum(self.chi2_stokes, axis=3)
 
     def vminmaxImage(self):
@@ -541,6 +552,26 @@ class Window(QMainWindow):
                     self.chi2_stokes[self.tt, self.yy, self.xx, 2],
                     self.chi2_stokes[self.tt, self.yy, self.xx, 3])
         self.status.showMessage(coords+' | '+model+' | '+profs)
+
+    def incWave(self):
+        self.ww += 1
+        if (self.ww >= self.nw): self.ww = 0
+        self.wslider.setValue(self.ww)
+        self.drawSynth()
+        self.drawObs()
+        self.updateWMarker()
+        self.updateStatus()
+
+    def decWave(self):
+        self.ww -= 1
+        if (self.ww < 0): self.ww = self.nw-1
+        self.wslider.setValue(self.ww)
+        self.drawSynth()
+        self.drawObs()
+        self.updateWMarker()
+        self.updateStatus()
+
+
 
 
 if __name__ == '__main__':
