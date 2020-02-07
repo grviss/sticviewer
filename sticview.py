@@ -262,15 +262,15 @@ class Window(QMainWindow):
         self.wslider.slider.valueChanged.connect(self.updateWave)
 
         # Stokes button group
-        labels_stokes = ['I', 'Q', 'U', 'V']
+        self.labels_stokes = ['I', 'Q', 'U', 'V']
         self.bgroup = QWidget()
         self.bgroup_stokes = QButtonGroup()
         layout = QHBoxLayout()
         label_stokes = QLabel()
         layout.addWidget(label_stokes)
         label_stokes.setText('Stokes')
-        for ii in range(len(labels_stokes)):
-            button = QRadioButton(labels_stokes[ii])
+        for ii in range(len(self.labels_stokes)):
+            button = QRadioButton(self.labels_stokes[ii])
             if ii == 0: button.setChecked(True)
             self.bgroup_stokes.addButton(button, ii)
             layout.addWidget(button)
@@ -406,7 +406,8 @@ class Window(QMainWindow):
         minval = np.minimum(self.obsprof.min(), self.synprof.min())
         obsprof = self.obsprof + np.abs(minval)*1.1
         synprof = self.synprof + np.abs(minval)*1.1 # avoid division by 0
-        self.chi2 = np.sum((obsprof - synprof)**2 / synprof, axis=(3,4))
+        self.chi2_stokes = np.sum((obsprof - synprof)**2 / synprof, axis=3)
+        self.chi2 = np.sum(self.chi2_stokes, axis=3)
 
     def vminmaxImage(self):
         min_syn = np.min(self.s.dat[:,:,:,self.wsel,:], axis=(0,1,2,3))
@@ -531,10 +532,14 @@ class Window(QMainWindow):
                         self.m.Bln[self.tt, self.yy, self.xx, self.itau],
                         self.m.Bho[self.tt, self.yy, self.xx, self.itau],
                         self.m.azi[self.tt, self.yy, self.xx, self.itau])
-        profs = 'Profile: Iobs={0:>6.3f}, Isyn={1:>6.3f}, Chi2={2:>5.2f}'.\
+        profs = 'Profile: Iobs={0:>6.3f}, Isyn={1:>6.3f}, Chi2={2:>5.2f} [(I, Q, U, V)=({3:>5.2f},{4:>5.2f},{5:>5.2f},{6:>5.2f})]'.\
                 format(self.o.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
                     self.s.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
-                    self.chi2[self.tt, self.yy, self.xx])
+                    self.chi2[self.tt, self.yy, self.xx],
+                    self.chi2_stokes[self.tt, self.yy, self.xx, 0],
+                    self.chi2_stokes[self.tt, self.yy, self.xx, 1],
+                    self.chi2_stokes[self.tt, self.yy, self.xx, 2],
+                    self.chi2_stokes[self.tt, self.yy, self.xx, 3])
         self.status.showMessage(coords+' | '+model+' | '+profs)
 
 
