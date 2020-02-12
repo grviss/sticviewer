@@ -357,14 +357,23 @@ class Window(QMainWindow):
         exitButton.triggered.connect(qApp.quit)
         filemenu.addAction(exitButton)
 
-        wincButton = QAction('Wavelength +', self)
-        wincButton.setShortcut('Ctrl+S')
+        wincButton = QAction('Wavelength up', self)
+        wincButton.setShortcut('Shift+S')
         wincButton.triggered.connect(self.incWave)
         viewmenu.addAction(wincButton)
-        wdecButton = QAction('Wavelength -', self)
-        wdecButton.setShortcut('Ctrl+A')
+        wdecButton = QAction('Wavelength down', self)
+        wdecButton.setShortcut('Shift+A')
         wdecButton.triggered.connect(self.decWave)
         viewmenu.addAction(wdecButton)
+
+        tincButton = QAction('Time up', self)
+        tincButton.setShortcut('Shift+F')
+        tincButton.triggered.connect(self.incTime)
+        viewmenu.addAction(tincButton)
+        tdecButton = QAction('Time down', self)
+        tdecButton.setShortcut('Shift+B')
+        tdecButton.triggered.connect(self.decTime)
+        viewmenu.addAction(tdecButton)
 
         # ---- initialise statusbar ----
         self.status = self.statusBar()
@@ -556,22 +565,40 @@ class Window(QMainWindow):
     def incWave(self):
         self.ww += 1
         if (self.ww >= self.nw): self.ww = 0
-        self.wslider.setValue(self.ww)
-        self.drawSynth()
-        self.drawObs()
-        self.updateWMarker()
-        self.updateStatus()
+        self.changeWave()
 
     def decWave(self):
         self.ww -= 1
         if (self.ww < 0): self.ww = self.nw-1
+        self.changeWave()
+
+    def changeWave(self):
         self.wslider.setValue(self.ww)
         self.drawSynth()
         self.drawObs()
         self.updateWMarker()
         self.updateStatus()
 
+    def incTime(self):
+        self.tt += 1
+        if (self.tt >= self.nt): self.tt = 0
+        self.changeTime()
 
+    def decTime(self):
+        self.tt -= 1
+        if (self.tt < 0): self.tt = self.nt-1
+        self.changeTime()
+
+    def changeTime(self):
+        self.tslider.setValue(self.tt)
+        self.drawModel()
+        self.drawSynth()
+        self.drawObs()
+        self.plotModel()
+        self.plotSynth()
+        self.plotObs()
+        self.updateWMarker()
+        self.updateStatus()
 
 
 if __name__ == '__main__':
