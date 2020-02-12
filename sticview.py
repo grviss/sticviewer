@@ -429,6 +429,10 @@ class Window(QMainWindow):
         self.o = sp.profile(self.fname_obs)
         self.wsel = np.where(self.o.dat[0,0,0,:,0] > 0)[0]
         self.wav = self.o.wav[self.wsel]
+        if np.diff(self.wav).max() > 50.:
+            self.plot_wav = np.arange(self.wsel.size)
+        else:
+            self.plot_wav = self.wav
         self.obsprof = self.o.dat[:,:,:,self.wsel,:]
 
     def getChi2(self):
@@ -477,7 +481,7 @@ class Window(QMainWindow):
 
     def plotSynth(self):
         for ii in range(4):
-            self.cwplots[ii+2].invplot.setData(self.wav,
+            self.cwplots[ii+2].invplot.setData(self.plot_wav,
                     self.synprof[self.tt,self.yy,self.xx,:,ii], pen=self.invpen)
 
     def drawObs(self):
@@ -487,7 +491,7 @@ class Window(QMainWindow):
 
     def plotObs(self):
         for ii in range(4):
-            self.cwplots[ii+2].obsplot.setData(self.wav,
+            self.cwplots[ii+2].obsplot.setData(self.plot_wav,
                     self.obsprof[self.tt,self.yy,self.xx,:,ii], symbol='o',
                     symbolPen='k')
 
@@ -535,7 +539,7 @@ class Window(QMainWindow):
 
     def updateWMarker(self):
         for ii in range(4):
-            self.cwplots[ii+2].line.setPos(self.wav[self.ww])
+            self.cwplots[ii+2].line.setPos(self.plot_wav[self.ww])
 
     def updateTauMarker(self):
         for ii in range(2):
