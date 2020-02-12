@@ -375,6 +375,15 @@ class Window(QMainWindow):
         tdecButton.triggered.connect(self.decTime)
         viewmenu.addAction(tdecButton)
 
+        dincButton = QAction('Depth up', self)
+        dincButton.setShortcut('Shift+X')
+        dincButton.triggered.connect(self.incDepth)
+        viewmenu.addAction(dincButton)
+        ddecButton = QAction('Depth down', self)
+        ddecButton.setShortcut('Shift+Z')
+        ddecButton.triggered.connect(self.decDepth)
+        viewmenu.addAction(ddecButton)
+
         # ---- initialise statusbar ----
         self.status = self.statusBar()
 
@@ -391,6 +400,7 @@ class Window(QMainWindow):
         self.yy = np.int(self.ny/2)
         self.nt = self.m.nt
         self.ltaus = self.m.ltau[0,0,0,:]
+        self.ndep = self.m.ndep
 
         self.m.azi *= 180./np.pi
         self.m.vturb *= 1.e-5  # in km/s
@@ -591,6 +601,27 @@ class Window(QMainWindow):
 
     def changeTime(self):
         self.tslider.setValue(self.tt)
+        self.drawModel()
+        self.drawSynth()
+        self.drawObs()
+        self.plotModel()
+        self.plotSynth()
+        self.plotObs()
+        self.updateWMarker()
+        self.updateStatus()
+
+    def incDepth(self):
+        self.itau += 1
+        if (self.itau >= self.ndep): self.itau = 0
+        self.changeDepth()
+
+    def decDepth(self):
+        self.itau -= 1
+        if (self.itau < 0): self.itau = self.ndep-1
+        self.changeDepth()
+
+    def changeDepth(self):
+        self.zslider.setValue(self.ltaus[self.itau])
         self.drawModel()
         self.drawSynth()
         self.drawObs()
