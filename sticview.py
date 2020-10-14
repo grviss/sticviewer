@@ -251,9 +251,8 @@ class Window(QMainWindow):
         # ---- set up control panel ----
         cpanel_layout = QVBoxLayout()
 
-        self.zslider = Slider('Optical depth [log('+u"τ"+')]', self.ltaus.min(),
-                self.ltaus.max(), np.diff(self.ltaus).mean()/2.,
-                self.ltaus[self.itau])
+        self.zslider = Slider('Optical depth [index: log('+u"τ"+')]', 0,
+                self.ndep-1, 1, self.ndep-1, values=self.ltaus, intslider=True)
         self.zslider.slider.valueChanged.connect(self.updateDepth)
         self.tslider = Slider('Time [index]', 0, self.nt-1, 1, 0, intslider=True)
         if self.nt == 1:
@@ -526,7 +525,7 @@ class Window(QMainWindow):
             sys.exit()
 
     def updateDepth(self):
-        self.itau = np.argmin(np.abs(self.ltaus-self.zslider.sval))
+        self.itau = self.zslider.sval 
         self.drawModel()
         self.updateTauMarker()
         self.updateStatus()
