@@ -575,8 +575,8 @@ class Window(QMainWindow):
                         self.m.Bho[self.tt, self.yy, self.xx, self.itau],
                         self.m.azi[self.tt, self.yy, self.xx, self.itau])
         profs = 'Profile: Iobs={0:>6.3f}, Isyn={1:>6.3f}, Chi2={2:>5.2f} [(I, Q, U, V)=({3:>5.2f},{4:>5.2f},{5:>5.2f},{6:>5.2f})]'.\
-                format(self.o.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
-                    self.s.dat[self.tt, self.yy, self.xx, self.ww, self.istokes],
+                format(self.obsprof[self.tt, self.yy, self.xx, self.ww, self.istokes],
+                    self.synprof[self.tt, self.yy, self.xx, self.ww, self.istokes],
                     self.chi2[self.tt, self.yy, self.xx],
                     self.chi2_stokes[self.tt, self.yy, self.xx, 0],
                     self.chi2_stokes[self.tt, self.yy, self.xx, 1],
