@@ -408,7 +408,7 @@ class Window(QMainWindow):
         self.xx = np.int(self.nx/2)
         self.yy = np.int(self.ny/2)
         self.nt = self.m.nt
-        self.ltaus = self.m.ltau[0,0,0,:]
+        self.ltaus = self.m.ltau[0,self.ny//2,self.nx//2,:]
         self.ndep = self.m.ndep
 
         self.m.azi *= 180./np.pi
@@ -441,7 +441,7 @@ class Window(QMainWindow):
 
     def initObs(self):
         self.o = sp.profile(self.fname_obs)
-        self.wsel = np.where(self.o.dat[0,0,0,:,0] > 0)[0]
+        self.wsel = np.where(self.o.dat[0,self.o.ny//2,self.o.nx//2,:,0] > 0)[0]
         self.wav = self.o.wav[self.wsel]
         self.plot_iwav = np.diff(self.wav).max() > 50.
         if self.plot_iwav:
