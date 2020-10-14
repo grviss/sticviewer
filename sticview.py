@@ -12,7 +12,7 @@ from matplotlib.colors import LinearSegmentedColormap
 try:
     from PyQt5 import QtCore
 except ImportError:
-    raise SystemExit(ImportError('PyQt5 is required to run STiCViewer'))
+    raise SystemExit('ImportError: PyQt5 is required to run STiCViewer')
 else:
     from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, qApp,
     QVBoxLayout, QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
@@ -22,12 +22,12 @@ else:
 try:
     import pyqtgraph as pg
 except ImportError:
-    raise SystemExit(ImportError('pyqtgraph is required to run STiCViewer'))
+    raise SystemExit('ImportError: pyqtgraph is required to run STiCViewer')
 
 try:
     import sparsetools as sp
 except ImportError:
-    raise SystemExit(ImportError('sparsetools (comes with STiC distribution) is required to run STiCViewer'))
+    raise SystemExit('ImportError: sparsetools (comes with STiC distribution) is required to run STiCViewer')
 
 def mplcm_to_pglut(cmap):
     cmap._init()
