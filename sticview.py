@@ -18,8 +18,6 @@ import pyqtgraph as pg
 
 import sparsetools as sp
 
-from ipdb import set_trace as stop
-
 def mplcm_to_pglut(cmap):
     cmap._init()
     lut = (cmap._lut * 255).view(np.ndarray)
