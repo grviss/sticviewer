@@ -82,11 +82,15 @@ def shift_cmap(cmap, data, name='shifted'):
 
 class CWImage(QWidget):
     def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', ch_color='w', nx=None,
-            ny=None, parent=None):
+            ny=None, xtitle=None, ytitle=None, parent=None):
         super(CWImage, self).__init__(parent=parent)
         self.box = canvas.addPlot(row=row, col=col)
         self.img = pg.ImageItem()
         self.img.setLookupTable(mplcm_to_pglut(cm_name))
+        if xtitle is not None:
+            self.box.setLabel('bottom', xtitle)
+        if ytitle is not None:
+            self.box.setLabel('left', ytitle)
 
         self.box.addItem(self.img)
         if (parent is not None):
@@ -328,8 +332,14 @@ class Window(QMainWindow):
 
         self.cwimages = []
         for ii in range(len(cols)):
+            xtitle = ytitle = None
+            if rows[ii] == 2:
+                xtitle = 'pixel'
+            if cols[ii] == 0:
+                ytitle = 'pixel'
             cwimage = CWImage(self.icanvas, row=rows[ii], col=cols[ii],
-                    cm_name=cm.get_cmap(cm_names[ii]), ch_color=ch_colors[ii], parent=self)
+                    cm_name=cm.get_cmap(cm_names[ii]), ch_color=ch_colors[ii],
+                    xtitle=xtitle, ytitle=ytitle, parent=self)
             self.cwimages.append(cwimage)
 
         for ii in range(len(cols)-1):
