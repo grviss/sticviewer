@@ -18,7 +18,7 @@ else:
     QVBoxLayout, QFileDialog, QWidget, QHBoxLayout, QVBoxLayout, QPushButton,
     QSlider, QLabel, QGridLayout, QSpacerItem, QSizePolicy, QRadioButton,
     QButtonGroup, QGroupBox)
-#from PyQt5 import QtCore
+
 try:
     import pyqtgraph as pg
 except ImportError:
