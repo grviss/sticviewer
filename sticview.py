@@ -139,7 +139,7 @@ class CWPlot(QWidget):
 
 
 class Slider(QWidget):
-    def __init__(self, label, vmin, vmax, step, initval, intslider=False, parent=None):
+    def __init__(self, label, vmin, vmax, step, initval, values=None, units='', intslider=False, parent=None):
         super(Slider, self).__init__(parent=parent)
         # Create elements
         self.slider = QSlider(self)
@@ -158,6 +158,8 @@ class Slider(QWidget):
         if self.vmax == self.vmin:
             self.vmax += 1
         self.sval = None
+        self.values = values
+        self.units = units
 
         if intslider is True:
             self.slider.setMinimum(self.vmin)
@@ -199,6 +201,9 @@ class Slider(QWidget):
     def setLabelValue(self, intslider=False):
         if intslider is False:
             self.labelvalue.setText("{0:.2f}".format(self.sval))
+        elif self.values is not None:
+            self.labelvalue.setText("{0}: {1:.2f}{2}".format(self.sval,
+                self.values[self.sval], self.units))
         else:
             self.labelvalue.setText("{0}".format(self.sval))
 
@@ -257,8 +262,8 @@ class Window(QMainWindow):
             self.tslider.setDisabled(True)
         self.tslider.slider.valueChanged.connect(self.updateTime)
 
-        self.wslider = Slider('Wavelength [index]', 0, self.nw-1, 1, 0,
-                intslider=True)
+        self.wslider = Slider('Wavelength [index: value]', 0, self.nw-1, 1, 0,
+                values=self.wav, units=u'Å', intslider=True)
         self.wslider.slider.valueChanged.connect(self.updateWave)
 
         # Stokes button group
@@ -326,7 +331,11 @@ class Window(QMainWindow):
         rows = [0, 0, 1, 1, 2, 2]
         cols = [0, 1] * 3
         xtitles_mod = ['log('+u"τ"+')'] * 2
-        xtitles_obs = ['wavelength'] * 4
+        if self.plot_iwav:
+            self.wunit = 'index'
+        else:
+            self.wunit = u'Å'
+        xtitles_obs = ['wavelength [{0}]'.format(self.wunit)] * 4
         xtitles = xtitles_mod + xtitles_obs
         ytitles_mod = ['T [kK]', 'v [km/s]']
         ytitles_obs = ['scaled intensity'] * 4
@@ -434,7 +443,8 @@ class Window(QMainWindow):
         self.o = sp.profile(self.fname_obs)
         self.wsel = np.where(self.o.dat[0,0,0,:,0] > 0)[0]
         self.wav = self.o.wav[self.wsel]
-        if np.diff(self.wav).max() > 50.:
+        self.plot_iwav = np.diff(self.wav).max() > 50.
+        if self.plot_iwav:
             self.plot_wav = np.arange(self.wsel.size)
         else:
             self.plot_wav = self.wav
