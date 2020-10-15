@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap
 
+#from ipdb import set_trace as stop
+
 try:
     from PyQt5 import QtCore
 except ImportError:
@@ -547,6 +549,10 @@ class Window(QMainWindow):
 
     def updateDepth(self):
         self.itau = self.zslider.sval 
+        self.lut_vlos = mplcm_to_pglut(shift_cmap(cm.get_cmap('bwr'),
+            self.m.vlos[:,:,:,self.itau]))
+        self.lut_Bln = mplcm_to_pglut(shift_cmap(cm.get_cmap('RdGy_r'),
+            self.m.Bln[:,:,:,self.itau]))
         self.drawModel()
         self.updateTauMarker()
         self.updateStatus()
