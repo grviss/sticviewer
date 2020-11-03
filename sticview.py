@@ -413,6 +413,11 @@ class Window(QMainWindow):
         ddecButton.triggered.connect(self.decDepth)
         viewmenu.addAction(ddecButton)
 
+        fnameButton = QAction('Show filenames', self)
+        fnameButton.setShortcut('Ctrl+F')
+        fnameButton.triggered.connect(self.showFname)
+        viewmenu.addAction(fnameButton)
+
         # ---- initialise statusbar ----
         self.status = self.statusBar()
 
@@ -610,6 +615,13 @@ class Window(QMainWindow):
                     self.chi2_stokes[self.tt, self.yy, self.xx, 2],
                     self.chi2_stokes[self.tt, self.yy, self.xx, 3])
         self.status.showMessage(coords+' | '+model+' | '+profs)
+
+    def showFname(self):
+        filenames = 'Observed: {0} | Synthetic: {1} | Model: {2}'.\
+                format(os.path.basename(self.fname_obs),
+                        os.path.basename(self.fname_synth),
+                        os.path.basename(self.fname_atmos))
+        self.status.showMessage(filenames)
 
     def incWave(self):
         self.ww += 1
