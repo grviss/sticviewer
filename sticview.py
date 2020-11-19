@@ -329,7 +329,7 @@ class Window(QMainWindow):
         rows = [0, 0, 0, 1, 1, 1, 2, 2, 2]
         cols = [0, 1, 2] * 3
         cm_names = ['gist_heat', 'bwr', 'gist_gray', 'RdGy_r', 'Oranges',
-        'Greens', 'gist_gray', 'Blues_r', 'copper']
+        'Greens', 'Blues_r', 'Blues_r', 'copper']
         ch_colors = ['w', 'k', 'w', 'k', 'k', 'k', 'w', 'k', 'w']
 
         self.cwimages = []
