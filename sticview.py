@@ -476,12 +476,11 @@ class Window(QMainWindow):
         self.obsprof = self.o.dat[:,:,:,self.wsel,:]
 
     def getChi2(self):
-        minval = np.minimum(self.obsprof.min(), self.synprof.min())
-        obsprof = self.obsprof + np.abs(minval)*1.1
-        synprof = self.synprof + np.abs(minval)*1.1 # avoid division by 0
-        self.chi2_stokes = np.sum((obsprof - synprof)**2 / synprof, axis=3)
-        self.chi2_stokes = np.sum((synprof - obsprof)**2 / obsprof, axis=3)
-        self.chi2 = np.sum(self.chi2_stokes, axis=3)
+        self.wts = np.zeros(self.obsprof.shape)
+        self.wts[:,:,:] = self.o.weights[self.wsel,:]
+        self.chi2_stokes = np.sum(((self.obsprof - self.synprof)/self.wts)**2,
+                axis=3) / self.nw
+        self.chi2 = np.sum(self.chi2_stokes, axis=3) / self.o.ns
 
     def vminmaxImage(self):
         min_syn = np.min(self.s.dat[:,:,:,self.wsel,:], axis=(0,1,2,3))
