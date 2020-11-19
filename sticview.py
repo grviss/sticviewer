@@ -281,7 +281,7 @@ class Window(QMainWindow):
         self.wslider.slider.valueChanged.connect(self.updateWave)
 
         # Stokes button group
-        self.labels_stokes = ['I', 'Q', 'U', 'V']
+        self.labels_stokes = 'IQUV'
         self.bgroup = QWidget()
         self.bgroup_stokes = QButtonGroup()
         layout = QHBoxLayout()
@@ -358,7 +358,7 @@ class Window(QMainWindow):
         xtitles_obs = ['wavelength [{0}]'.format(self.wunit)] * 4
         xtitles = xtitles_mod + xtitles_obs
         ytitles_mod = ['T [kK]', 'v [km/s]']
-        ytitles_obs = ['scaled intensity'] * 4
+        ytitles_obs = [i+j+k for i,j,k in zip(['Stokes ']*4, self.labels_stokes,[' (scaled)'] * 4)]
         ytitles = ytitles_mod + ytitles_obs
         self.cwplots = []
         for ii in range(len(cols)):
