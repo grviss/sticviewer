@@ -1,5 +1,5 @@
 # STiCViewer
-`STiCViewer` is a graphical user interface written in PyQt5 to visualise output
+STiCViewer is a graphical user interface written in PyQt5 to visualise output
 from the STockholm Inversion Code
 ([STiC](https://github.com/jaimedelacruz/stic)). 
 
@@ -8,7 +8,7 @@ Clone the repository and make sure you have the following dependencies
 installed:
 * PyQt5
 * PyQtGraph ([http://www.pyqtgraph.org/](http://www.pyqtgraph.org/))
-* sparsetools (comes with the STiC distribution)
+* sparsetools.py (comes with the STiC distribution)
 
 STiCViewer requires Python 3 to run.
 
