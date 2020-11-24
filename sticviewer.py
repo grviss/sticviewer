@@ -230,6 +230,7 @@ class Window(QMainWindow):
         pg.setConfigOptions(imageAxisOrder='row-major')
 
         # ---- get input ----
+        self.cwd = os.getcwd()
         self.filetypes = {\
              'atm': {'name': 'atmosout', 'fullname': 'atmosphere model',
              'filter': '*.nc'},
@@ -539,12 +540,14 @@ class Window(QMainWindow):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         filename, _ = QFileDialog.getOpenFileName(self, 
-            "Please select the input {0} file".format(typedict['name']), os.getcwd(), 
+            "Please select the input {0} file".format(typedict['name']), self.cwd, 
             "STiC {0} file ({1})".format(typedict['fullname'],
                 typedict['filter']), options=options)
         if filename:
             print("{0}: opening {1} file {2}".format(inam, typedict['fullname'],
                 filename))
+            dirname = os.path.dirname(filename)
+            if self.cwd != dirname: self.cwd = dirname
             return filename
         else:
             print("{0} [error]: {1} file required to launch " \
