@@ -17,3 +17,16 @@ anywhere, e.g. in bash:
 ```
 alias sticviewer='python ~/git/sticviewer/sticviewer.py'
 ```
+
+## Running STiCViewer
+There are two ways of running STiCViewer:
+* by simply executing the python script without any arguments. This will pop up
+  a file search window in which you can select the observed, synthetic and model
+  atmosphere files (in that order).
+* by providing three arguments to the script, e.g.:
+  ```
+  sticviewer observed.nc synthetic.nc atmosout.nc
+  ```
+  This will skip the pop-up file search and load those file directly.
+
+Sample data for preview purposes is provided in the `sample` directory.
