@@ -29,4 +29,4 @@ There are two ways of running STiCViewer:
   ```
   This will skip the pop-up file search and load those file directly.
 
-Sample data for preview purposes is provided in the `sample` directory.
+Sample data for preview purposes are provided in the `sample` directory.
