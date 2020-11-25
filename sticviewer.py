@@ -231,16 +231,19 @@ class Window(QMainWindow):
 
         # ---- get input ----
         self.cwd = os.getcwd()
-        self.filetypes = {\
-             'atm': {'name': 'atmosout', 'fullname': 'atmosphere model',
-             'filter': '*.nc'},
-             'syn': {'name': 'synthetic', 'fullname': 'synthetic profile',
-             'filter': '*.nc'},
-             'obs': {'name': 'observed', 'fullname': 'observed profile',
-             'filter': '*.nc'}}
-        self.fname_atmos = self.getFileName(typedict=self.filetypes['atm'])
-        self.fname_synth = self.getFileName(typedict=self.filetypes['syn'])
-        self.fname_obs = self.getFileName(typedict=self.filetypes['obs'])
+        if len(sys.argv) == 4:
+            self.fname_obs, self.fname_synth, self.fname_atmos = sys.argv[1:]
+        else:
+            self.filetypes = {\
+                 'atm': {'name': 'atmosout', 'fullname': 'atmosphere model',
+                 'filter': '*.nc'},
+                 'syn': {'name': 'synthetic', 'fullname': 'synthetic profile',
+                 'filter': '*.nc'},
+                 'obs': {'name': 'observed', 'fullname': 'observed profile',
+                 'filter': '*.nc'}}
+            self.fname_obs = self.getFileName(typedict=self.filetypes['obs'])
+            self.fname_synth = self.getFileName(typedict=self.filetypes['syn'])
+            self.fname_atmos = self.getFileName(typedict=self.filetypes['atm'])
 
         # ---- initialise input ----
         self.initObs()
