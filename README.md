@@ -12,7 +12,7 @@ installed:
 * sparsetools.py (comes with the STiC distribution)
 
 
-For convenience one can create an alias to allow calling STiCViewer from
+For convenience one can create an alias so that STiCViewer can be called from
 anywhere, e.g. in bash:
 ```
 alias sticviewer='python3 ~/git/sticviewer/sticviewer.py'
