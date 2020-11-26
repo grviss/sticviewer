@@ -1,7 +1,7 @@
 # STiCViewer
 STiCViewer is a graphical user interface written in PyQt5 to visualise output
 from the STockholm Inversion Code
-([STiC](https://github.com/jaimedelacruz/stic)). 
+(STiC; [https://github.com/jaimedelacruz/stic](https://github.com/jaimedelacruz/stic)). 
 
 ## Setup
 STiCViewer requires Python 3 to run.
