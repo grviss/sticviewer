@@ -11,6 +11,9 @@ from matplotlib.colors import LinearSegmentedColormap
 
 #from ipdb import set_trace as stop
 
+if sys.version_info[0] < 3:
+    raise SystemExit('Error: Python 3 or later is required to run STiCViewer')
+
 try:
     from PyQt5 import QtCore
 except ImportError:
