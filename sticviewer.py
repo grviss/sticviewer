@@ -39,7 +39,7 @@ def mplcm_to_pglut(cmap):
     lut = (cmap._lut * 255).view(np.ndarray)
     return lut
 
-def shift_cmap(cmap, data, name='shifted'):
+def cmap_shift(cmap, data, name='shifted'):
     """
     Function to offset the "center" of a colormap. Useful for
     data with a negative min and positive max and you want the
@@ -464,7 +464,7 @@ class Window(QMainWindow):
         self.minmax_vlos[0,:] = np.min(self.m.vlos, axis=(0,1,2))
         self.minmax_vlos[1,:] = np.max(self.m.vlos, axis=(0,1,2))
         self.minmax_vlos_all = (self.minmax_vlos[0].min(), self.minmax_vlos[1].max())
-        self.cmap_vlos = shift_cmap(cm.get_cmap('bwr'), self.m.vlos)
+        self.cmap_vlos = cmap_shift(cm.get_cmap('bwr'), self.m.vlos)
         self.lut_vlos = mplcm_to_pglut(cmap_truncate(self.cmap_vlos,
             minmax=self.minmax_vlos_all,
             minmax_new=(self.m.vlos[:,:,:,self.itau].min(),
@@ -473,7 +473,7 @@ class Window(QMainWindow):
         self.minmax_Bln = np.zeros((2, self.m.ndep), dtype='float64')
         self.minmax_Bln[0,:] = np.min(self.m.Bln, axis=(0,1,2))
         self.minmax_Bln[1,:] = np.max(self.m.Bln, axis=(0,1,2))
-        self.lut_Bln = mplcm_to_pglut(shift_cmap(cm.get_cmap('RdGy_r'),
+        self.lut_Bln = mplcm_to_pglut(cmap_shift(cm.get_cmap('RdGy_r'),
             self.m.Bln[:,:,:,self.itau]))
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
@@ -580,7 +580,7 @@ class Window(QMainWindow):
             minmax=self.minmax_vlos_all,
             minmax_new=(self.m.vlos[:,:,:,self.itau].min(),
                 self.m.vlos[:,:,:,self.itau].max()) ) )
-        self.lut_Bln = mplcm_to_pglut(shift_cmap(cm.get_cmap('RdGy_r'),
+        self.lut_Bln = mplcm_to_pglut(cmap_shift(cm.get_cmap('RdGy_r'),
             self.m.Bln[:,:,:,self.itau]))
         vlos_tmp = self.m.vlos[:,:,:,self.itau]
         self.drawModel()
