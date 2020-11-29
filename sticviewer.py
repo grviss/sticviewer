@@ -473,8 +473,12 @@ class Window(QMainWindow):
         self.minmax_Bln = np.zeros((2, self.m.ndep), dtype='float64')
         self.minmax_Bln[0,:] = np.min(self.m.Bln, axis=(0,1,2))
         self.minmax_Bln[1,:] = np.max(self.m.Bln, axis=(0,1,2))
-        self.lut_Bln = mplcm_to_pglut(cmap_shift(cm.get_cmap('RdGy_r'),
-            self.m.Bln[:,:,:,self.itau]))
+        self.minmax_Bln_all = (self.minmax_Bln[0].min(), self.minmax_Bln[1].max())
+        self.cmap_Bln = cmap_shift(cm.get_cmap('RdGy_r'), self.m.Bln)
+        self.lut_Bln = mplcm_to_pglut(cmap_truncate(self.cmap_Bln,
+            minmax=self.minmax_Bln_all,
+            minmax_new=(self.m.Bln[:,:,:,self.itau].min(),
+                self.m.Bln[:,:,:,self.itau].max()) ) )
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
 
@@ -580,9 +584,10 @@ class Window(QMainWindow):
             minmax=self.minmax_vlos_all,
             minmax_new=(self.m.vlos[:,:,:,self.itau].min(),
                 self.m.vlos[:,:,:,self.itau].max()) ) )
-        self.lut_Bln = mplcm_to_pglut(cmap_shift(cm.get_cmap('RdGy_r'),
-            self.m.Bln[:,:,:,self.itau]))
-        vlos_tmp = self.m.vlos[:,:,:,self.itau]
+        self.lut_Bln = mplcm_to_pglut(cmap_truncate(self.cmap_Bln,
+            minmax=self.minmax_Bln_all,
+            minmax_new=(self.m.Bln[:,:,:,self.itau].min(),
+                self.m.Bln[:,:,:,self.itau].max()) ) )
         self.drawModel()
         self.updateTauMarker()
         self.updateStatus()
