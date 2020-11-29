@@ -84,6 +84,16 @@ def shift_cmap(cmap, data, name='shifted'):
 
     return newcmap
 
+def cmap_truncate(cmap, minmax=[0.0,1.0], minmax_new=[0.1,0.9], n=256):
+    # from https://stackoverflow.com/questions/18926031/how-to-extract-a-subset-of-a-colormap-as-a-new-colormap-in-matplotlib
+    drange = np.diff(minmax)[0]
+    minval = (minmax_new[0]-minmax[0])/drange
+    maxval = 1.-(minmax_new[1]-minmax[1])/drange
+    new_cmap = LinearSegmentedColormap.from_list(
+        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+        cmap(np.linspace(minval, maxval, n)))
+    return new_cmap
+
 
 class CWImage(QWidget):
     def __init__(self, canvas, row=0, col=0, cm_name='gist_gray', ch_color='w', nx=None,
@@ -453,8 +463,12 @@ class Window(QMainWindow):
         self.minmax_vlos = np.zeros((2, self.m.ndep), dtype='float64')
         self.minmax_vlos[0,:] = np.min(self.m.vlos, axis=(0,1,2))
         self.minmax_vlos[1,:] = np.max(self.m.vlos, axis=(0,1,2))
-        self.lut_vlos = mplcm_to_pglut(shift_cmap(cm.get_cmap('bwr'),
-            self.m.vlos[:,:,:,self.itau]))
+        self.minmax_vlos_all = (self.minmax_vlos[0].min(), self.minmax_vlos[1].max())
+        self.cmap_vlos = shift_cmap(cm.get_cmap('bwr'), self.m.vlos)
+        self.lut_vlos = mplcm_to_pglut(cmap_truncate(self.cmap_vlos,
+            minmax=self.minmax_vlos_all,
+            minmax_new=(self.m.vlos[:,:,:,self.itau].min(),
+                self.m.vlos[:,:,:,self.itau].max()) ) )
 
         self.minmax_Bln = np.zeros((2, self.m.ndep), dtype='float64')
         self.minmax_Bln[0,:] = np.min(self.m.Bln, axis=(0,1,2))
@@ -562,10 +576,13 @@ class Window(QMainWindow):
 
     def updateDepth(self):
         self.itau = self.zslider.sval 
-        self.lut_vlos = mplcm_to_pglut(shift_cmap(cm.get_cmap('bwr'),
-            self.m.vlos[:,:,:,self.itau]))
+        self.lut_vlos = mplcm_to_pglut(cmap_truncate(self.cmap_vlos,
+            minmax=self.minmax_vlos_all,
+            minmax_new=(self.m.vlos[:,:,:,self.itau].min(),
+                self.m.vlos[:,:,:,self.itau].max()) ) )
         self.lut_Bln = mplcm_to_pglut(shift_cmap(cm.get_cmap('RdGy_r'),
             self.m.Bln[:,:,:,self.itau]))
+        vlos_tmp = self.m.vlos[:,:,:,self.itau]
         self.drawModel()
         self.updateTauMarker()
         self.updateStatus()
