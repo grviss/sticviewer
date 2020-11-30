@@ -702,7 +702,7 @@ class Window(QMainWindow):
         self.changeDepth()
 
     def changeDepth(self):
-        self.zslider.setValue(self.ltaus[self.itau])
+        self.zslider.setValue(self.itau)
         self.drawModel()
         self.drawSynth()
         self.drawObs()
