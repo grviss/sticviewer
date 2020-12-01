@@ -39,56 +39,12 @@ def mplcm_to_pglut(cmap):
     lut = (cmap._lut * 255).view(np.ndarray)
     return lut
 
-def cmap_shift(cmap, data, name='shifted'):
-    """
-    Function to offset the "center" of a colormap. Useful for
-    data with a negative min and positive max and you want the
-    middle of the colormap's dynamic range to be at zero
-
-    Author:
-        Paul H.
-        (https://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib/7741317#7741317)
-    """
-
-    cdict = {
-        'red': [],
-        'green': [],
-        'blue': [],
-        'alpha': []
-    }
-
-    start = 0.0
-    stop = 1.0
-
-    midpoint = 1. - data.max()/(data.max() + np.abs(data.min()))
-    if midpoint >= 1: midpoint = 1.
-
-    # regular index to compute the colors
-    reg_index = np.linspace(start, stop, 257)
-
-    # shifted index to match the data
-    shift_index = np.hstack([
-        np.linspace(0.0, midpoint, 128, endpoint=False),
-        np.linspace(midpoint, 1.0, 129, endpoint=True)
-    ])
-
-    for ri, si in zip(reg_index, shift_index):
-        r, g, b, a = cmap(ri)
-
-        cdict['red'].append((si, r, r))
-        cdict['green'].append((si, g, g))
-        cdict['blue'].append((si, b, b))
-        cdict['alpha'].append((si, a, a))
-
-    newcmap = LinearSegmentedColormap(name, cdict)
-
-    return newcmap
-
-def cmap_truncate(cmap, minmax=[0.0,1.0], minmax_new=[0.1,0.9], n=256):
+def cmap_truncate(cmap, absmax=1.0, minmax=[0.1,0.9], n=256):
     # from https://stackoverflow.com/questions/18926031/how-to-extract-a-subset-of-a-colormap-as-a-new-colormap-in-matplotlib
-    drange = np.diff(minmax)[0]
-    minval = (minmax_new[0]-minmax[0])/drange
-    maxval = 1.-(minmax[1]-minmax_new[1])/drange
+    minmax_all = [-1.*absmax, absmax]
+    drange = np.diff(minmax_all)[0]
+    minval = (minmax[0]-minmax_all[0])/drange
+    maxval = 1.-(minmax_all[1]-minmax[1])/drange
     new_cmap = LinearSegmentedColormap.from_list(
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, n)))
@@ -464,20 +420,18 @@ class Window(QMainWindow):
         self.minmax_vlos[0,:] = np.min(self.m.vlos, axis=(0,1,2))
         self.minmax_vlos[1,:] = np.max(self.m.vlos, axis=(0,1,2))
         self.minmax_vlos_all = (self.minmax_vlos[0].min(), self.minmax_vlos[1].max())
-        self.cmap_vlos = cmap_shift(cm.get_cmap('bwr'), self.m.vlos)
-        self.lut_vlos = mplcm_to_pglut(cmap_truncate(self.cmap_vlos,
-            minmax=self.minmax_vlos_all,
-            minmax_new=(self.m.vlos[:,:,:,self.itau].min(),
+        self.absmax_vlos = np.abs(self.m.vlos).max()
+        self.lut_vlos = mplcm_to_pglut(cmap_truncate(cm.get_cmap('bwr'),
+            absmax=self.absmax_vlos, minmax=(self.m.vlos[:,:,:,self.itau].min(),
                 self.m.vlos[:,:,:,self.itau].max()) ) )
 
         self.minmax_Bln = np.zeros((2, self.m.ndep), dtype='float64')
         self.minmax_Bln[0,:] = np.min(self.m.Bln, axis=(0,1,2))
         self.minmax_Bln[1,:] = np.max(self.m.Bln, axis=(0,1,2))
         self.minmax_Bln_all = (self.minmax_Bln[0].min(), self.minmax_Bln[1].max())
-        self.cmap_Bln = cmap_shift(cm.get_cmap('RdGy_r'), self.m.Bln)
-        self.lut_Bln = mplcm_to_pglut(cmap_truncate(self.cmap_Bln,
-            minmax=self.minmax_Bln_all,
-            minmax_new=(self.m.Bln[:,:,:,self.itau].min(),
+        self.absmax_Bln = np.abs(self.m.Bln).max()
+        self.lut_Bln = mplcm_to_pglut(cmap_truncate(cm.get_cmap('RdGy_r'),
+            absmax=self.absmax_Bln, minmax=(self.m.Bln[:,:,:,self.itau].min(),
                 self.m.Bln[:,:,:,self.itau].max()) ) )
         print("initModel: Model has dimensions (nx,ny)=({0},{1})".format(self.nx,
             self.ny))
@@ -580,13 +534,11 @@ class Window(QMainWindow):
 
     def updateDepth(self):
         self.itau = self.zslider.sval 
-        self.lut_vlos = mplcm_to_pglut(cmap_truncate(self.cmap_vlos,
-            minmax=self.minmax_vlos_all,
-            minmax_new=(self.m.vlos[:,:,:,self.itau].min(),
+        self.lut_vlos = mplcm_to_pglut(cmap_truncate(cm.get_cmap('bwr'),
+            absmax=self.absmax_vlos, minmax=(self.m.vlos[:,:,:,self.itau].min(),
                 self.m.vlos[:,:,:,self.itau].max()) ) )
-        self.lut_Bln = mplcm_to_pglut(cmap_truncate(self.cmap_Bln,
-            minmax=self.minmax_Bln_all,
-            minmax_new=(self.m.Bln[:,:,:,self.itau].min(),
+        self.lut_Bln = mplcm_to_pglut(cmap_truncate(cm.get_cmap('RdGy_r'),
+            absmax=self.absmax_Bln, minmax=(self.m.Bln[:,:,:,self.itau].min(),
                 self.m.Bln[:,:,:,self.itau].max()) ) )
         self.drawModel()
         self.updateTauMarker()
