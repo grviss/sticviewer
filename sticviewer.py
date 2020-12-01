@@ -88,7 +88,7 @@ def cmap_truncate(cmap, minmax=[0.0,1.0], minmax_new=[0.1,0.9], n=256):
     # from https://stackoverflow.com/questions/18926031/how-to-extract-a-subset-of-a-colormap-as-a-new-colormap-in-matplotlib
     drange = np.diff(minmax)[0]
     minval = (minmax_new[0]-minmax[0])/drange
-    maxval = 1.-(minmax_new[1]-minmax[1])/drange
+    maxval = 1.-(minmax[1]-minmax_new[1])/drange
     new_cmap = LinearSegmentedColormap.from_list(
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, n)))
