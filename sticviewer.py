@@ -36,7 +36,7 @@ except ImportError:
 
 def mplcm_to_pglut(cmap):
     cmap._init()
-    lut = (cmap._lut * 255).view(np.ndarray)
+    lut = (cmap._lut * 255).view(np.ndarray)[:256,:]
     return lut
 
 def cmap_truncate(cmap, absmax=1.0, minmax=[0.1,0.9], n=256):
